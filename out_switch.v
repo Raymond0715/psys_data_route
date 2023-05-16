@@ -25,8 +25,6 @@ module out_switch # (
 	input										clk,
 	input										rst_n,
 
-	input										en,
-
 	input	[DWIDTH-1:0]						s_axis_tdata_0,
 	input										s_axis_tvalid_0,
 	output										s_axis_tready_0,
@@ -35,58 +33,33 @@ module out_switch # (
 	input										s_axis_tvalid_1,
 	output										s_axis_tready_1,
 
-	output	[DWIDTH-1:0]						m_axis_tdata,
-	output										m_axis_tvalid,
+	output	reg [DWIDTH-1:0]					m_axis_tdata,
+	output	reg									m_axis_tvalid,
 	input										m_axis_tready
 );
 
 
-	reg 						m_axis_tvalid_reg;
+	wire	[DWIDTH-1:0]		data_0, data_1;
 
-	reg		[DWIDTH-1:0]		data_0, data_1;
 
-	always @(posedge clk) begin
-		if (~rst_n) begin
-			data_0 <= 'd0;
-			data_1 <= 'd0;
-		end
-		else begin
-			if (s_axis_tready_0 & s_axis_tvalid_0 & en) begin
-				data_0 <= s_axis_tdata_0;
-			end
-			else begin
-				data_0 <= 0;
-			end
-
-			if (s_axis_tready_1 & s_axis_tvalid_1 & en) begin
-				data_1 <= s_axis_tdata_1;
-			end
-			else begin
-				data_1 <= 0;
-			end
-		end
-	end
+	assign data_0 <= s_axis_tvalid_0 ? s_axis_tdata_0 : 0;
+	assign data_1 <= s_axis_tvalid_1 ? s_axis_tdata_1 : 0;
 
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			m_axis_tvalid_reg <= 0;
+			m_axis_tdata <= 'd0;
+			m_axis_tvalid <= 0;
 		end
 		else begin
-			if (s_axis_tvalid_0 | s_axis_tvalid_1) begin
-				m_axis_tvalid_reg <= 1;
-			end
-			else begin
-				m_axis_tvalid_reg <= 0;
-			end
+			m_axis_tdata <= data_0 | data_1;
+			m_axis_tvalid <= s_axis_tvalid_0 | s_axis_tvalid_1;
 		end
 	end
 
 
-	assign m_axis_tvalid = en & m_axis_tvalid_reg;
 	assign s_axis_tready_0 = m_axis_tready;
 	assign s_axis_tready_1 = m_axis_tready;
-	assign m_axis_tdata = data_0 | data_1;
 
 
 endmodule
