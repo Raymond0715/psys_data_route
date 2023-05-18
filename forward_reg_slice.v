@@ -38,7 +38,7 @@ module forward_reg_slice # (
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			m_out_tdata <= 1'b0;
+			m_out_tdata <= 0;
 		end
 		else begin
 			if (s_in_tvalid & m_out_tready) begin

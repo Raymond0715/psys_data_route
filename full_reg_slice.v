@@ -28,48 +28,89 @@ module full_reg_slice # (
 
 	input		[DWIDTH-1:0]					s_in_tdata,
 	input										s_in_tvalid,
-	output										s_in_tready,
+	output	reg									s_in_tready,
 
 	output		[DWIDTH-1:0]					m_out_tdata,
-	output										m_out_tvalid,
+	output	reg									m_out_tvalid,
 	input										m_out_tready
 );
 
 
+	localparam EMPTY = 2'b00;
+	localparam RUN   = 2'b01;
+	localparam FULL  = 2'b10;
+
+	reg		[1:0]				c_state, n_state;
+
 	reg		[DWIDTH-1:0]		in_tdata_reg_0, in_tdata_reg_1;
-	reg		[1:0]				count_reg;
-	reg							ctrl_reg, s_in_tvalid_reg, m_out_tready_reg;
-
-	wire						empty, full;
+	reg							ctrl_reg_0, ctrl_reg_1, empty, full;
 
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			m_out_tready_reg <= 1'd0;
+			c_state <= EMPTY;
 		end
 		else begin
-			m_out_tready_reg <= m_out_tready;
+			c_state <= n_state;
+		end
+	end
+
+
+	always @(*) begin
+		if (~rst_n) begin
+			n_state = EMPTY;
+		end
+		else begin
+			case(c_state)
+				EMPTY:
+					begin
+						if ((s_in_tvalid & s_in_tready) & ~(m_out_tvalid & m_out_tready)) begin
+							n_state = RUN;
+						end
+						else begin
+							n_state = EMPTY;
+						end
+					end
+
+				RUN:
+					begin
+						if (~(s_in_tready & s_in_tvalid) & m_out_tready & m_out_tvalid) begin
+							n_state = EMPTY;
+						end
+						else if (s_in_tready & s_in_tvalid & ~(m_out_tready & m_out_tvalid)) begin
+							n_state = FULL;
+						end
+						else begin
+							n_state = RUN;
+						end
+					end
+
+				FULL:
+					begin
+						if (~(s_in_tready & s_in_tvalid) & m_out_tready & m_out_tvalid) begin
+							n_state = RUN;
+						end
+						else begin
+							n_state = FULL;
+						end
+					end
+			endcase
 		end
 	end
 
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			s_in_tvalid_reg <= 1'd0;
+			ctrl_reg_0 <= 1'd0;
+			ctrl_reg_1 <= 1'd0;
 		end
 		else begin
-			s_in_tvalid_reg <= s_in_tvalid;
-		end
-	end
-
-
-	always @(posedge clk) begin
-		if (~rst_n) begin
-			ctrl_reg <= 1'd0;
-		end
-		else begin
-			if ((m_out_tvalid & m_out_tready) | (s_in_tvalid | s_in_tready)) begin
-				ctrl_reg = ~ctrl_reg;
+			if (c_state == RUN & n_state == FULL & s_in_tready & s_in_tvalid & ctrl_reg_0 == ctrl_reg_1) begin
+				ctrl_reg_0 = ~ctrl_reg_0;
+			end
+			if (c_state == FULL & n_state == RUN & m_out_tready & m_out_tvalid) begin
+				ctrl_reg_0 = ~ctrl_reg_0;
+				ctrl_reg_1 = ~ctrl_reg_1;
 			end
 		end
 	end
@@ -77,14 +118,45 @@ module full_reg_slice # (
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			count_reg <= 2'd0;
+			empty <= 1'd1;
+			full <= 1'd0;
 		end
 		else begin
-			if (~s_in_tvalid & m_out_tready & count_reg > 0) begin
-				count_reg <= count_reg - 1;
+			if (n_state == FULL) begin
+				full <= 1'd1;
 			end
-			if (s_in_tvalid & ~m_out_tready & count_reg < 2) begin
-				count_reg <= count_reg + 1;
+			else begin
+				full <= 1'd0;
+			end
+			if (n_state == EMPTY) begin
+				empty <= 1'd1;
+			end
+			else begin
+				empty <= 1'd0;
+			end
+		end
+
+	end
+
+
+	always @(posedge clk) begin
+		if (~rst_n) begin
+			s_in_tready <= 1'd0;
+			m_out_tvalid <= 1'd0;
+		end
+		else begin
+			if (n_state == FULL && ~(m_out_tready & m_out_tvalid)) begin
+				s_in_tready <= 1'd0;
+			end
+			else begin
+				s_in_tready <= m_out_tready;
+			end
+
+			if (c_state == EMPTY && ~(s_in_tready & s_in_tvalid)) begin
+				m_out_tvalid <= 1'd0;
+			end
+			else begin
+				m_out_tvalid <= 1'd1;
 			end
 		end
 	end
@@ -92,12 +164,12 @@ module full_reg_slice # (
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			in_tdata_reg_0 <= DWIDTH'd0;
-			in_tdata_reg_1 <= DWIDTH'd0;
+			in_tdata_reg_0 <= 0;
+			in_tdata_reg_1 <= 0;
 		end
 		else begin
 			if (s_in_tvalid & s_in_tready) begin
-				if (ctrl_reg) begin
+				if (ctrl_reg_0) begin
 					in_tdata_reg_0 <= s_in_tdata;
 				end 
 				else begin
@@ -108,11 +180,7 @@ module full_reg_slice # (
 	end
 
 
-	assign empty = ~count_reg[1] & ~count_reg[0];
-	assign full = count_reg[1] & ~count_reg[0];
-	assign m_out_tdata = ctrl_reg ? in_tdata_reg_1 : in_tdata_reg_0;
-	assign m_out_tvalid = s_in_tvalid_reg | ~empty;
-	assign s_in_tready = m_out_tready_reg | ~full;
+	assign m_out_tdata = ctrl_reg_1 ? in_tdata_reg_0 : in_tdata_reg_1;
 
 
 endmodule

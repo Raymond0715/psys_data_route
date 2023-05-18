@@ -112,9 +112,9 @@ module inter_switch (
 
 	assign s_inter_tvalid = in_a_tvalid | in_b_tvalid | in_c_tvalid | in_d_tvalid
 					| in_e_tvalid;
-	
 
-	forward_reg_slice # (
+
+	full_reg_slice # (
 		.DWIDTH (1536)
 	)
 	inter_reg_slice (
