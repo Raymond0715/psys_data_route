@@ -138,7 +138,7 @@ module inter_switch (
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			inter_tdata_reg <= 1'b0;
+			inter_tvalid_reg <= 1'b0;
 		end
 		else if (inter_tvalid) begin
 			inter_tvalid_reg = 1'b1;
