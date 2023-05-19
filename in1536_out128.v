@@ -3,9 +3,9 @@
 * Company:        Zhejiang University
 * Engineer:       Raymond
 *
-* Create Date:    2023/05/12
+* Create Date:    2023/0518
 * Design Name:    poly_systolic_hw
-* Module Name:    in1536_out256_flex
+* Module Name:    in1536_out128
 * Project Name:   data_route
 * Target Devices: ZCU 102
 * Tool Versions:  Vivado 2021.2
@@ -15,23 +15,19 @@
 *
 * Revision:
 * Additional Comments:
-* - shift_ctrl[2:0]: 3'b001  3'b010  3'b100
 *
 *******************************************************************************/
 
 
-module in1536_out256_flex (
+module in1536_out128 (
 	input										clk,
 	input										rst_n,
-
-	input	[2:0]								shift_ctrl,
-	input	[8:0]								shift_reg,
 
 	input	[1535:0]							s_axis_tdata,
 	input										s_axis_tvalid,
 	output	reg									s_axis_tready,
 
-	output	[255:0]								m_axis_tdata,
+	output	[127:0]								m_axis_tdata,
 	output	reg									m_axis_tvalid,
 	input										m_axis_tready
 );
@@ -43,37 +39,31 @@ module in1536_out256_flex (
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			s_axis_tready <= 1;
-			m_axis_tvalid <= 0;
+			s_axis_tready <= 1'd1;
+			m_axis_tvalid <= 1'd0;
 		end
 		else begin
-			if (count > shift_reg) begin
-				m_axis_tvalid <= 1;
-				s_axis_tready <= 0;
+			if (count > 8'd128) begin
+				m_axis_tvalid <= 1'd1;
+				s_axis_tready <= 1'd0;
 			end
-			else if (count == shift_reg) begin
+			else if (count == 8'd128) begin
+				m_axis_tvalid <= 1'd1;
 				if (m_axis_tready) begin
-					s_axis_tready <= 1;
+					s_axis_tready <= 1'd1;
 				end
 				else begin
-					s_axis_tready <= 0;
-				end
-
-				if (~s_axis_tvalid & m_axis_tready) begin
-					m_axis_tvalid <= 0;
-				end
-				else begin
-					m_axis_tvalid <= 1;
+					s_axis_tready <= 1'd0;
 				end
 			end
 			else begin
 				if (s_axis_tvalid) begin
-					m_axis_tvalid <= 1;
-					s_axis_tready <= 0;
+					m_axis_tvalid <= 1'd1;
+					s_axis_tready <= 1'd0;
 				end
 				else begin
-					m_axis_tvalid <= 0;
-					s_axis_tready <= 1;
+					m_axis_tvalid <= 1'd0;
+					s_axis_tready <= 1'd1;
 				end
 			end
 		end
@@ -86,20 +76,22 @@ module in1536_out256_flex (
 		end
 		else begin
 			if (m_axis_tready) begin
-				if (count > shift_reg) begin
-					count <= count - shift_reg;
+				if (count > 8'd128) begin
+					count <= count - 8'd128;
 				end
-				else if (count == shift_reg) begin
+				else if (count == 8'd128) begin
 					if (s_axis_tvalid) begin
 						count <= 11'd1536;
 					end
 					else begin
-						count <= count - shift_reg;
+						count <= count - 8'd128;
 					end
 				end
-			end
-			if (count == 11'd0 && s_axis_tvalid) begin
-				count <= 11'd1536;
+				else begin
+					if (s_axis_tvalid) begin
+						count <= 11'd1536;
+					end
+				end
 			end
 		end
 	end
@@ -111,8 +103,8 @@ module in1536_out256_flex (
 		end
 		else begin
 			if (m_axis_tready) begin
-				if (count > shift_reg) begin
-					in_reg <= in_reg >> shift_reg;
+				if (count > 8'd128) begin
+					in_reg <= in_reg >> 8'd128;
 				end
 				else if (s_axis_tvalid) begin
 					in_reg <= s_axis_tdata;
@@ -122,12 +114,7 @@ module in1536_out256_flex (
 	end
 
 
-	assign m_axis_tdata[63:0] = in_reg[63:0];
-	assign m_axis_tdata[127:64] = shift_ctrl[2] ? in_reg[127:64] : in_reg[63:0];
-	assign m_axis_tdata[191:128] =
-		(shift_ctrl[0] | shift_ctrl[2]) ? in_reg[63:0] : in_reg[191:128];
-	assign m_axis_tdata[255:192] =
-		shift_ctrl[2] ? in_reg[255:192] : shift_ctrl[1] ? in_reg[127:64] : in_reg[63:0];
+	assign m_axis_tdata = in_reg[127:0];
 
 
 endmodule

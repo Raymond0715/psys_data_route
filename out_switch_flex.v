@@ -68,6 +68,8 @@ module out_switch_flex (
 		if (~rst_n) begin
 			m_axis_g_tdata <= 1280'd0;
 			m_axis_h_tdata <= 256'd0;
+			m_axis_g_tvalid <= 1'd0;
+			m_axis_h_tvalid <= 1'd0;
 		end
 		else begin
 			m_axis_g_tdata <= data_g_0 | data_g_1;

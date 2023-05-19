@@ -192,8 +192,8 @@ module inter_switch (
 
 
 	in1536_out128 dwidth_converter_out (
-		.aclk				( clk ),
-		.aresetn			( rst_n ),
+		.clk				( clk ),
+		.rst_n				( rst_n ),
 		.s_axis_tdata		( m_inter_tdata ),
 		.s_axis_tvalid		( m_inter_tvalid ),
 		.s_axis_tready		( inter_128_tready ),

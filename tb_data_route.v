@@ -101,7 +101,7 @@ module tb_data_route;
 	// input d
 	data_gen # (
 		.Width					( 128	),
-		.CONFIG_LEN				( 10	),
+		.CONFIG_LEN				( 120	),
 		.FRAME_NUM				( 1		),
 		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_d.txt")
 	)
@@ -118,7 +118,7 @@ module tb_data_route;
 	// input e
 	data_gen # (
 		.Width					( 128	),
-		.CONFIG_LEN				( 10	),
+		.CONFIG_LEN				( 120	),
 		.FRAME_NUM				( 1		),
 		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_e.txt")
 	)
@@ -136,7 +136,7 @@ module tb_data_route;
 	data_route data_route_inst (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( 36'h20108806c ),
+		.ctrl					( 36'h201e48043 ),
 
 		.s_in_a_tdata			( in_tdata_a  ),
 		.s_in_a_tvalid			( in_tvalid_a ),
@@ -185,6 +185,94 @@ module tb_data_route;
 		.m_out_h_tvalid			( out_tvalid_h ),
 		.m_out_h_tready			( out_tready_h )
 	);
+
+
+	integer handle0 ;
+	initial handle0=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_a_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_a & out_tready_a) begin
+				$fdisplay(handle0,"%h",out_tdata_a);
+			end
+		end
+	end
+
+
+	integer handle1 ;
+	initial handle1=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_b_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_b & out_tready_b) begin
+				$fdisplay(handle1,"%h",out_tdata_b);
+			end
+		end
+	end
+
+
+	integer handle2 ;
+	initial handle2=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_c_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_c & out_tready_c) begin
+				$fdisplay(handle2,"%h",out_tdata_c);
+			end
+		end
+	end
+
+
+	integer handle3 ;
+	initial handle3=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_d_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_d & out_tready_d) begin
+				$fdisplay(handle2,"%h",out_tdata_d);
+			end
+		end
+	end
+
+
+	integer handle4 ;
+	initial handle4=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_e_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_e & out_tready_e) begin
+				$fdisplay(handle2,"%h",out_tdata_e);
+			end
+		end
+	end
+
+
+	integer handle5 ;
+	initial handle5=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_f_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_f & out_tready_f) begin
+				$fdisplay(handle2,"%h",out_tdata_f);
+			end
+		end
+	end
+
+
+	integer handle6 ;
+	initial handle6=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_g_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_g & out_tready_g) begin
+				$fdisplay(handle2,"%h",out_tdata_g);
+			end
+		end
+	end
+
+
+	integer handle7 ;
+	initial handle7=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_h_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_h & out_tready_h) begin
+				$fdisplay(handle2,"%h",out_tdata_h);
+			end
+		end
+	end
 
 
 endmodule

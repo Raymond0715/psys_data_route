@@ -86,7 +86,7 @@ module data_route (
 
 	wire		s_in_a_tready_0, s_in_b_tready_0, s_in_c_tready_0;
 	wire		s_in_a_tready_1, s_in_b_tready_1, s_in_c_tready_1;
-	wire		in_d_tready, in_e_tready;
+	//wire		in_d_tready, in_e_tready;
 
 	wire	[1535:0]		switch_out_0, switch_out_1;
 	wire	[255:0]			switch_out_0_256, switch_out_1_256;
@@ -106,16 +106,16 @@ module data_route (
 	assign s_in_a_tready = s_in_a_tready_0 | s_in_a_tready_1;
 	assign s_in_b_tready = s_in_b_tready_0 | s_in_b_tready_1;
 	assign s_in_c_tready = s_in_c_tready_0 | s_in_c_tready_1;
-	assign s_in_d_tready = in_d_tready & (in_d_tready_0 | in_d_tready_1);
-	assign s_in_e_tready = in_e_tready & (in_e_tready_0 | in_e_tready_1);
+	//assign s_in_d_tready = in_d_tready & (in_d_tready_0 | in_d_tready_1);
+	//assign s_in_e_tready = in_e_tready & (in_e_tready_0 | in_e_tready_1);
 
 
 	in128_out1536 dwidth_converter_ind (
-		.aclk					( clk ),
-		.aresetn				( rst_n ),
+		.clk					( clk ),
+		.rst_n					( rst_n ),
 		.s_axis_tdata			( s_in_d_tdata ),
 		.s_axis_tvalid			( s_in_d_tvalid ),
-		.s_axis_tready			( in_d_tready ),
+		.s_axis_tready			( s_in_d_tready ),
 		.m_axis_tdata			( in_d_tdata ),
 		.m_axis_tvalid			( in_d_tvalid ),
 		.m_axis_tready			( in_d_tready_0 | in_d_tready_1 )
@@ -123,11 +123,11 @@ module data_route (
 
 
 	in128_out1536 dwidth_converter_ine (
-		.aclk					( clk ),
-		.aresetn				( rst_n ),
+		.clk					( clk ),
+		.rst_n					( rst_n ),
 		.s_axis_tdata			( s_in_e_tdata ),
-		.s_axis_tvalid			( in_e_tvalid ),
-		.s_axis_tready			( in_e_tready ),
+		.s_axis_tvalid			( s_in_e_tvalid ),
+		.s_axis_tready			( s_in_e_tready ),
 		.m_axis_tdata			( in_e_tdata ),
 		.m_axis_tvalid			( in_e_tvalid ),
 		.m_axis_tready			( in_e_tready_0 | in_e_tready_1 )
