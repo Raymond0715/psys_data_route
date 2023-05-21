@@ -48,12 +48,18 @@ module in1536_out128 (
 				s_axis_tready <= 1'd0;
 			end
 			else if (count == 8'd128) begin
-				m_axis_tvalid <= 1'd1;
 				if (m_axis_tready) begin
 					s_axis_tready <= 1'd1;
 				end
 				else begin
 					s_axis_tready <= 1'd0;
+				end
+
+				if (~s_axis_tvalid & m_axis_tready) begin
+					m_axis_tvalid <= 1'd0;
+				end
+				else begin
+					m_axis_tvalid <= 1'd1;
 				end
 			end
 			else begin

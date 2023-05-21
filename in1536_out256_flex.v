@@ -123,9 +123,10 @@ module in1536_out256_flex (
 
 
 	assign m_axis_tdata[63:0] = in_reg[63:0];
-	assign m_axis_tdata[127:64] = shift_ctrl[2] ? in_reg[127:64] : in_reg[63:0];
+	assign m_axis_tdata[127:64] =
+		(shift_ctrl[1] | shift_ctrl[2]) ? in_reg[127:64] : in_reg[63:0];
 	assign m_axis_tdata[191:128] =
-		(shift_ctrl[0] | shift_ctrl[2]) ? in_reg[63:0] : in_reg[191:128];
+		(shift_ctrl[0] | shift_ctrl[1]) ? in_reg[63:0] : in_reg[191:128];
 	assign m_axis_tdata[255:192] =
 		shift_ctrl[2] ? in_reg[255:192] : shift_ctrl[1] ? in_reg[127:64] : in_reg[63:0];
 

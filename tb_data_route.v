@@ -136,7 +136,7 @@ module tb_data_route;
 	data_route data_route_inst (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( 36'h201e48043 ),
+		.ctrl					( 36'h20121009b ),
 
 		.s_in_a_tdata			( in_tdata_a  ),
 		.s_in_a_tvalid			( in_tvalid_a ),
@@ -225,7 +225,7 @@ module tb_data_route;
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_d & out_tready_d) begin
-				$fdisplay(handle2,"%h",out_tdata_d);
+				$fdisplay(handle3,"%h",out_tdata_d);
 			end
 		end
 	end
@@ -236,7 +236,7 @@ module tb_data_route;
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_e & out_tready_e) begin
-				$fdisplay(handle2,"%h",out_tdata_e);
+				$fdisplay(handle4,"%h",out_tdata_e);
 			end
 		end
 	end
@@ -247,7 +247,7 @@ module tb_data_route;
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_f & out_tready_f) begin
-				$fdisplay(handle2,"%h",out_tdata_f);
+				$fdisplay(handle5,"%h",out_tdata_f);
 			end
 		end
 	end
@@ -258,7 +258,7 @@ module tb_data_route;
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_g & out_tready_g) begin
-				$fdisplay(handle2,"%h",out_tdata_g);
+				$fdisplay(handle6,"%h",out_tdata_g);
 			end
 		end
 	end
@@ -269,7 +269,7 @@ module tb_data_route;
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_h & out_tready_h) begin
-				$fdisplay(handle2,"%h",out_tdata_h);
+				$fdisplay(handle7,"%h",out_tdata_h);
 			end
 		end
 	end

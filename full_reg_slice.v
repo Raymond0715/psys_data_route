@@ -155,7 +155,7 @@ module full_reg_slice # (
 				s_in_tready <= 1'd1;
 			end
 
-			if (c_state == EMPTY && ~(s_in_tready & s_in_tvalid)) begin
+			if (n_state == EMPTY && ~(s_in_tready & s_in_tvalid)) begin
 				m_out_tvalid <= 1'd0;
 			end
 			else begin
