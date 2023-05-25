@@ -22,12 +22,14 @@
 *
 *******************************************************************************/
 
+`include "define_droute.vh"
 
 module data_route (
 	input										clk,
 	input										rst_n,
 
-	input	[35:0]								ctrl,
+	input	[17:0]								droute_switch_0,
+	input	[17:0]								droute_switch_1,
 
 	input	[1535:0]							s_in_a_tdata,
 	input										s_in_a_tvalid,
@@ -53,16 +55,25 @@ module data_route (
 	input	[127:0]								s_in_d_tdata,
 	input										s_in_d_tvalid,
 	output										s_in_d_tready,
+	input	[15:0]								s_in_d_tkeep,
+	input										s_in_d_tlast,
 	output	[127:0]								m_out_d_tdata,
 	output										m_out_d_tvalid,
 	input										m_out_d_tready,
+	output	reg [15:0]							m_out_d_tkeep = 16'hffff,
+	output	reg									m_out_d_tlast = 1'b0,
+
 
 	input	[127:0]								s_in_e_tdata,
 	input										s_in_e_tvalid,
 	output										s_in_e_tready,
+	input	[15:0]								s_in_e_tkeep,
+	input										s_in_e_tlast,
 	output	[127:0]								m_out_e_tdata,
 	output										m_out_e_tvalid,
 	input										m_out_e_tready,
+	output	reg [15:0]							m_out_e_tkeep = 16'hffff,
+	output	reg									m_out_e_tlast = 1'b0,
 
 	output	[1535:0]							m_out_f_tdata,
 	output										m_out_f_tvalid,
@@ -122,12 +133,43 @@ module data_route (
 	);
 
 
+`ifdef DROUTE_SIM
+	wire	[127:0]			sim_in_e_tdata;
+	wire					sim_in_e_tvalid, sim_in_e_tready;
+
+
+
+	data_gen # (
+		.Width					( 128	),
+		.CONFIG_LEN				( 96	),
+		.FRAME_NUM				( 1		),
+		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/poly_systolic/input.txt")
+	)
+	in_gen_d (
+		.i_sys_clk				( clk		),
+		.i_sys_rst_n			( rst_n		),
+		.i_start				( 1'b1		),
+		.O_chan_cha1_ph_tdata	( sim_in_e_tdata ),
+		.O_chan_ph_tvalid		( sim_in_e_tvalid	),
+		.O_chan_ph_tlast		( ),
+		.O_chan_ph_tready		( sim_in_e_tready )
+	);
+
+`endif
+
+
 	in128_out1536 dwidth_converter_ine (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
+`ifdef DROUTE_SIM
+		.s_axis_tdata			( sim_in_e_tdata ),
+		.s_axis_tvalid			( sim_in_e_tvalid ),
+		.s_axis_tready			( sim_in_e_tready ),
+`else
 		.s_axis_tdata			( s_in_e_tdata ),
 		.s_axis_tvalid			( s_in_e_tvalid ),
 		.s_axis_tready			( s_in_e_tready ),
+`endif
 		.m_axis_tdata			( in_e_tdata ),
 		.m_axis_tvalid			( in_e_tvalid ),
 		.m_axis_tready			( in_e_tready_0 | in_e_tready_1 )
@@ -137,7 +179,7 @@ module data_route (
 	inter_switch inter_switch_0 (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( ctrl[17:0] ),
+		.ctrl					( droute_switch_0[17:0] ),
 
 		.s_in_a_tdata			( s_in_a_tdata  ),
 		.s_in_a_tvalid			( s_in_a_tvalid ),
@@ -180,7 +222,7 @@ module data_route (
 	inter_switch inter_switch_1 (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( ctrl[35:18] ),
+		.ctrl					( droute_switch_1[17:0] ),
 
 		.s_in_a_tdata			( s_in_a_tdata  ),
 		.s_in_a_tvalid			( s_in_a_tvalid ),

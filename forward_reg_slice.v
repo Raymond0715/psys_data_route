@@ -52,11 +52,11 @@ module forward_reg_slice # (
 		if (~rst_n) begin
 			m_out_tvalid <= 1'b0;
 		end
-		else if (s_in_tvalid) begin
-			m_out_tvalid = 1'b1;
+		else if (s_in_tvalid & m_out_tready) begin
+			m_out_tvalid <= 1'b1;
 		end
 		else if (m_out_tready) begin
-			m_out_tvalid = 1'b0;
+			m_out_tvalid <= 1'b0;
 		end
 	end
 
