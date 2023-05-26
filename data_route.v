@@ -22,7 +22,7 @@
 *
 *******************************************************************************/
 
-`include "define_droute.vh"
+`include "define.vh"
 
 module data_route (
 	input										clk,
@@ -133,7 +133,7 @@ module data_route (
 	);
 
 
-`ifdef DROUTE_SIM
+`ifdef SIM
 	wire	[127:0]			sim_in_e_tdata;
 	wire					sim_in_e_tvalid, sim_in_e_tready;
 
@@ -141,7 +141,7 @@ module data_route (
 
 	data_gen # (
 		.Width					( 128	),
-		.CONFIG_LEN				( 96	),
+		.CONFIG_LEN				( 192	),
 		.FRAME_NUM				( 1		),
 		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/poly_systolic/input.txt")
 	)
@@ -161,7 +161,7 @@ module data_route (
 	in128_out1536 dwidth_converter_ine (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-`ifdef DROUTE_SIM
+`ifdef SIM
 		.s_axis_tdata			( sim_in_e_tdata ),
 		.s_axis_tvalid			( sim_in_e_tvalid ),
 		.s_axis_tready			( sim_in_e_tready ),
