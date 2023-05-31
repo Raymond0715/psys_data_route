@@ -39,23 +39,36 @@ module out_switch # (
 );
 
 
-	wire	[DWIDTH-1:0]		data_0, data_1;
+	wire	[DWIDTH-1:0]		tdata_0, tdata_1;
 
 
-	assign data_0 = s_axis_tvalid_0 ? s_axis_tdata_0 : 0;
-	assign data_1 = s_axis_tvalid_1 ? s_axis_tdata_1 : 0;
+	assign tdata_0 = s_axis_tvalid_0 ? s_axis_tdata_0 : 0;
+	assign tdata_1 = s_axis_tvalid_1 ? s_axis_tdata_1 : 0;
 
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			m_axis_tdata <= 'd0;
-			m_axis_tvalid <= 0;
+			m_axis_tdata <= 0;
 		end
 		else begin
-			if ((s_axis_tvalid_0 & s_axis_tready_0) | (s_axis_tvalid_1 & s_axis_tready_1)) begin
-				m_axis_tdata <= data_0 | data_1;
+			if ((s_axis_tvalid_0 | s_axis_tvalid_1) & m_axis_tready) begin
+				m_axis_tdata <= tdata_0 | tdata_1;
 			end
-			m_axis_tvalid <= s_axis_tvalid_0 | s_axis_tvalid_1;
+		end
+	end
+
+
+	always @(posedge clk) begin
+		if (~rst_n) begin
+			m_axis_tvalid <= 1'b0;
+		end
+		else begin
+			if ((s_axis_tvalid_0 | s_axis_tvalid_1) & m_axis_tready) begin
+				m_axis_tvalid <= 1'b1;
+			end
+			if (~(s_axis_tvalid_0 | s_axis_tvalid_1) & m_axis_tready) begin
+				m_axis_tvalid <= 1'b0;
+			end
 		end
 	end
 

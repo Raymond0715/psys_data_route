@@ -1,78 +1,89 @@
+/**
+*
+* Company:        Zhejiang University
+* Engineer:       Raymond
+*
+* Create Date:    2023/05/29
+* Design Name:    poly_systolic_hw
+* Module Name:    data_gen
+* Project Name:   None
+* Target Devices: ZCU 102
+* Tool Versions:  Vivado 2021.2
+* Description:
+*
+* Dependencies:
+*
+* Revision:
+* Additional Comments:
+*
+*******************************************************************************/
+
+
+`timescale 1ns/1ps
+
 
 module data_gen # (
-	parameter  Width       =  32,
-	parameter  CONFIG_LEN  =  2048,
-	parameter  FRAME_NUM   =  1,
-	parameter  Data_Path
+	parameter WIDTH,
+	parameter LENGTH,
+	parameter DPATH
 )
 (
-	input                  i_sys_clk,
-	input                  i_sys_rst_n,
+	input                  clk,
+	input                  rst_n,
 
-	input                  i_start,
+	output [WIDTH-1: 0]    m_tdata,
 
-	output [Width-1: 0]    O_chan_cha1_ph_tdata,
-
-	output                 O_chan_ph_tvalid,
-	output                 O_chan_ph_tlast,
-	input                  O_chan_ph_tready
+	output                 m_tvalid,
+	output                 m_tlast,
+	input                  m_tready
 
 	);
 
 
-	reg                r_axis_config_tvalid;
+	reg                m_tvalid_reg=1;
 
-	reg  [Width-1: 0]  input_data1[0:FRAME_NUM*CONFIG_LEN-1];
+	reg  [WIDTH-1: 0]  input_data[0:LENGTH-1];
 
 
 	initial begin
-		$readmemh(Data_Path,input_data1,0,FRAME_NUM*CONFIG_LEN-1);
+		$readmemh(DPATH,input_data,0,LENGTH-1);
 	end
 
 	// ----------------------------------------------------------
-	reg [64:0]      r_config_cnt   = 64'b0   ;
+	reg [64:0]      count   = 64'b0   ;
 	reg             valid_ctrl = 0 ;
-	reg             i_sys_rst_n_reg;
 
-	always @(posedge i_sys_clk) begin
-		i_sys_rst_n_reg <= i_sys_rst_n;
-	end
 
-	always @(posedge i_sys_clk) begin
-		if (~i_sys_rst_n_reg) begin
-			r_config_cnt <= 0;
+	always @(posedge clk) begin
+		if (~rst_n) begin
+			count <= 0;
 			valid_ctrl <= 1;
 		end
-		else if (r_config_cnt==(FRAME_NUM*CONFIG_LEN-1) && O_chan_ph_tvalid && O_chan_ph_tready) begin
-			r_config_cnt <= 0;
+		else if (count==(LENGTH-1) && m_tvalid && m_tready) begin
 			valid_ctrl <=  0;
 		end
-		else if (O_chan_ph_tvalid && O_chan_ph_tready)
-			r_config_cnt <= r_config_cnt + 1;
+		else if (m_tvalid && m_tready)
+			count <= count + 1;
 		else;
 	end
 
-	always @(posedge i_sys_clk) begin
-		if(~i_sys_rst_n_reg) begin
-			r_axis_config_tvalid <= 1'b0;
-		end
-		else begin
-			if (r_config_cnt==(FRAME_NUM*CONFIG_LEN-1) && O_chan_ph_tvalid && O_chan_ph_tready)begin
-				r_axis_config_tvalid <= 1'b0;
-			end
-			else if (i_start)begin
-				r_axis_config_tvalid <= 1'b1;
-			end
-			else begin
-				r_axis_config_tvalid <= r_axis_config_tvalid;
-			end
-		end
-	end
 
-	assign O_chan_ph_tvalid = r_axis_config_tvalid & valid_ctrl;
-	assign O_chan_cha1_ph_tdata = input_data1[r_config_cnt];
+	integer delay1, delay2, k;
+	initial
+		begin
+			for (k = 0; k < 100; k = k+1)
+				begin
+					delay1 = 10 * ( {$random} % 60 );
+					delay2 = 10 * ( {$random} % 60 );
+					# delay1 m_tvalid_reg = 1;
+					# delay2 m_tvalid_reg = 0;
+				end
+		end
 
-	assign O_chan_ph_tlast = ( (r_config_cnt % CONFIG_LEN) == CONFIG_LEN-1 ) ? 1 : 0;
+
+	assign m_tdata = input_data[count];
+	assign m_tvalid = m_tvalid_reg & valid_ctrl;
+	assign m_tlast = ( (count % LENGTH) == LENGTH-1 ) ? 1 : 0;
 
 
 endmodule

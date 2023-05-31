@@ -153,8 +153,7 @@ module inter_switch (
 
 	assign m_inter_tready = out_a_tready | out_b_tready | out_c_tready
 					   | out_f_tready | out_g_tready
-					   | (inter_128_tready & (out_d_tready | out_e_tready)) |
-					   | (inter_tready_256_flex & out_h_tready);
+					   | inter_128_tready | inter_tready_256_flex;
 
 	assign out_a_tready = switch_out_en[7] & m_out_a_tready;
 	assign out_b_tready = switch_out_en[6] & m_out_b_tready;
@@ -195,7 +194,7 @@ module inter_switch (
 		.clk				( clk ),
 		.rst_n				( rst_n ),
 		.s_axis_tdata		( m_inter_tdata ),
-		.s_axis_tvalid		( m_inter_tvalid ),
+		.s_axis_tvalid		( m_inter_tvalid & (switch_out_en[3] | switch_out_en[4]) ),
 		.s_axis_tready		( inter_128_tready ),
 		.m_axis_tdata		( out_inter_128_tdata ),
 		.m_axis_tvalid		( out_inter_128_tvalid ),

@@ -22,7 +22,7 @@
 *
 *******************************************************************************/
 
-`include "define.vh"
+`include "define_droute.vh"
 
 module data_route (
 	input										clk,
@@ -133,26 +133,24 @@ module data_route (
 	);
 
 
-`ifdef SIM
+`ifdef SIM_BD
 	wire	[127:0]			sim_in_e_tdata;
 	wire					sim_in_e_tvalid, sim_in_e_tready;
 
 
 
 	data_gen # (
-		.Width					( 128	),
-		.CONFIG_LEN				( 192	),
-		.FRAME_NUM				( 1		),
-		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/poly_systolic/input.txt")
+		.WIDTH					( 128	),
+		.LENGTH					( 768	),
+		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/poly_systolic/input.txt")
 	)
 	in_gen_d (
-		.i_sys_clk				( clk		),
-		.i_sys_rst_n			( rst_n		),
-		.i_start				( 1'b1		),
-		.O_chan_cha1_ph_tdata	( sim_in_e_tdata ),
-		.O_chan_ph_tvalid		( sim_in_e_tvalid	),
-		.O_chan_ph_tlast		( ),
-		.O_chan_ph_tready		( sim_in_e_tready )
+		.clk					( clk ),
+		.rst_n					( rst_n ),
+		.m_tdata				( sim_in_e_tdata ),
+		.m_tvalid				( sim_in_e_tvalid ),
+		.m_tlast				( ),
+		.m_tready				( sim_in_e_tready )
 	);
 
 `endif
@@ -161,7 +159,7 @@ module data_route (
 	in128_out1536 dwidth_converter_ine (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-`ifdef SIM
+`ifdef SIM_BD
 		.s_axis_tdata			( sim_in_e_tdata ),
 		.s_axis_tvalid			( sim_in_e_tvalid ),
 		.s_axis_tready			( sim_in_e_tready ),
@@ -348,7 +346,11 @@ module data_route (
 		.s_axis_tready_1		( out_e_tready_1 ),
 		.m_axis_tdata			( m_out_e_tdata ),
 		.m_axis_tvalid			( m_out_e_tvalid ),
+`ifdef SIM_BD
+		.m_axis_tready			( 1 )
+`else
 		.m_axis_tready			( m_out_e_tready )
+`endif
 	);
 
 
@@ -392,6 +394,19 @@ module data_route (
 		.m_axis_h_tvalid		( m_out_h_tvalid ),
 		.m_axis_h_tready		( m_out_h_tready )
 	);
+
+
+`ifdef SIM_BD
+	integer handle0 ;
+	initial handle0=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/poly_systolic/out_d_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (m_out_d_tvalid & m_out_d_tready) begin
+				$fdisplay(handle0,"%h",m_out_d_tdata);
+			end
+		end
+	end
+`endif
 
 
 endmodule

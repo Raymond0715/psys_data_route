@@ -1,3 +1,5 @@
+// There may be error in tready signal. Behaviour simulation is different from
+// block design simulation.
 `timescale 1ns/1ps
 
 
@@ -41,7 +43,6 @@ module tb_data_route;
 	reg			out_tready_b = 1;
 	reg			out_tready_c = 1;
 	reg			out_tready_d = 1;
-	reg			out_tready_e = 1;
 	reg			out_tready_f = 1;
 	reg			out_tready_g = 1;
 	reg			out_tready_h = 1;
@@ -49,94 +50,103 @@ module tb_data_route;
 
 	// input a
 	data_gen # (
-		.Width					( 1536	),
-		.CONFIG_LEN				( 10	),
-		.FRAME_NUM				( 1		),
-		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_a.txt")
+		.WIDTH					( 1536	),
+		.LENGTH					( 10	),
+		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_a.txt")
 	)
 	in_gen_a (
-		.i_sys_clk				( clk		),
-		.i_sys_rst_n			( rst_n		),
-		.i_start				( 1'b1		),
-		.O_chan_cha1_ph_tdata	( in_tdata_a ),
-		.O_chan_ph_tvalid		( in_tvalid_a ),
-		.O_chan_ph_tlast		( ),
-		.O_chan_ph_tready		( in_tready_a )
+		.clk					( clk		),
+		.rst_n					( rst_n		),
+		.m_tdata				( in_tdata_a ),
+		.m_tvalid				( in_tvalid_a ),
+		.m_tlast				( ),
+		.m_tready				( in_tready_a )
 	);
 
 	// input b
 	data_gen # (
-		.Width					( 1536	),
-		.CONFIG_LEN				( 10	),
-		.FRAME_NUM				( 1		),
-		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_b.txt")
+		.WIDTH					( 1536	),
+		.LENGTH					( 10	),
+		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_b.txt")
 	)
 	in_gen_b (
-		.i_sys_clk				( clk		),
-		.i_sys_rst_n			( rst_n		),
-		.i_start				( 1'b1		),
-		.O_chan_cha1_ph_tdata	( in_tdata_b ),
-		.O_chan_ph_tvalid		( in_tvalid_b	),
-		.O_chan_ph_tlast		( ),
-		.O_chan_ph_tready		( in_tready_b )
+		.clk					( clk		),
+		.rst_n					( rst_n		),
+		.m_tdata				( in_tdata_b ),
+		.m_tvalid				( in_tvalid_b	),
+		.m_tlast				( ),
+		.m_tready				( in_tready_b )
 	);
 
 	// input c
 	data_gen # (
-		.Width					( 1536	),
-		.CONFIG_LEN				( 10	),
-		.FRAME_NUM				( 1		),
-		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_c.txt")
+		.WIDTH					( 1536	),
+		.LENGTH					( 10	),
+		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_c.txt")
 	)
 	in_gen_c (
-		.i_sys_clk				( clk		),
-		.i_sys_rst_n			( rst_n		),
-		.i_start				( 1'b1		),
-		.O_chan_cha1_ph_tdata	( in_tdata_c ),
-		.O_chan_ph_tvalid		( in_tvalid_c ),
-		.O_chan_ph_tlast		( ),
-		.O_chan_ph_tready		( in_tready_c )
+		.clk					( clk		),
+		.rst_n					( rst_n		),
+		.m_tdata				( in_tdata_c ),
+		.m_tvalid				( in_tvalid_c ),
+		.m_tlast				( ),
+		.m_tready				( in_tready_c )
 	);
 
 	// input d
 	data_gen # (
-		.Width					( 128	),
-		.CONFIG_LEN				( 120	),
-		.FRAME_NUM				( 1		),
-		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_d.txt")
+		.WIDTH					( 128	),
+		.LENGTH					( 768	),
+		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_d.txt")
 	)
 	in_gen_d (
-		.i_sys_clk				( clk		),
-		.i_sys_rst_n			( rst_n		),
-		.i_start				( 1'b1		),
-		.O_chan_cha1_ph_tdata	( in_tdata_d ),
-		.O_chan_ph_tvalid		( in_tvalid_d ),
-		.O_chan_ph_tlast		( ),
-		.O_chan_ph_tready		( in_tready_d )
+		.clk					( clk		),
+		.rst_n					( rst_n		),
+		.m_tdata				( in_tdata_d ),
+		.m_tvalid				( in_tvalid_d ),
+		.m_tlast				( ),
+		.m_tready				( in_tready_d )
 	);
 
 	// input e
 	data_gen # (
-		.Width					( 128	),
-		.CONFIG_LEN				( 120	),
-		.FRAME_NUM				( 1		),
-		.Data_Path 				( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_e.txt")
+		.WIDTH					( 128	),
+		.LENGTH					( 120	),
+		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_e.txt")
 	)
 	in_gen_e (
-		.i_sys_clk				( clk		),
-		.i_sys_rst_n			( rst_n		),
-		.i_start				( 1'b1		),
-		.O_chan_cha1_ph_tdata	( in_tdata_e ),
-		.O_chan_ph_tvalid		( in_tvalid_e ),
-		.O_chan_ph_tlast		( ),
-		.O_chan_ph_tready		( in_tready_e )
+		.clk					( clk		),
+		.rst_n					( rst_n		),
+		.m_tdata				( in_tdata_e ),
+		.m_tvalid				( in_tvalid_e ),
+		.m_tlast				( ),
+		.m_tready				( in_tready_e )
 	);
+
+
+	reg sim_out_e_tready_reg=0;
+	wire out_tready_e;
+
+	assign out_tready_e = sim_out_e_tready_reg;
+
+	integer delay1, delay2, k;
+	initial
+		begin
+			for (k = 0; k < 100; k = k+1)
+				begin
+					delay1 = 10 * ( {$random} % 60 );
+					delay2 = 10 * ( {$random} % 60 );
+					# delay1 sim_out_e_tready_reg <= 1;
+					# delay2 sim_out_e_tready_reg <= 0;
+				end
+		end
 
 
 	data_route data_route_inst (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( 36'h20121009b ),
+		.droute_switch_0		( 36'h10099 ),
+		.droute_switch_1		( 36'h8048 ),
 
 		.s_in_a_tdata			( in_tdata_a  ),
 		.s_in_a_tvalid			( in_tvalid_a ),

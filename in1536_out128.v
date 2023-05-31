@@ -43,11 +43,11 @@ module in1536_out128 (
 			m_axis_tvalid <= 1'd0;
 		end
 		else begin
-			if (count > 8'd128) begin
+			if (count > 11'd128) begin
 				m_axis_tvalid <= 1'd1;
 				s_axis_tready <= 1'd0;
 			end
-			else if (count == 8'd128) begin
+			else if (count == 11'd128) begin
 				if (m_axis_tready) begin
 					s_axis_tready <= 1'd1;
 				end
@@ -81,23 +81,19 @@ module in1536_out128 (
 			count <= 11'd0;
 		end
 		else begin
-			if (m_axis_tready) begin
-				if (count > 8'd128) begin
-					count <= count - 8'd128;
-				end
-				else if (count == 8'd128) begin
-					if (s_axis_tvalid) begin
-						count <= 11'd1536;
-					end
-					else begin
-						count <= count - 8'd128;
-					end
-				end
-				else begin
-					if (s_axis_tvalid) begin
-						count <= 11'd1536;
-					end
-				end
+			if (m_axis_tready && count > 11'd128) begin
+				count <= count - 11'd128;
+			end
+
+			if (count == 11'd128 && m_axis_tready && s_axis_tvalid) begin
+				count <= 11'd1536;
+			end
+			else if (count == 11'd128 && m_axis_tready) begin
+				count <= count - 11'd128;
+			end
+
+			if (count == 11'd0 && s_axis_tvalid) begin
+				count <= 11'd1536;
 			end
 		end
 	end
@@ -108,13 +104,23 @@ module in1536_out128 (
 			in_reg <= 1536'd0;
 		end
 		else begin
-			if (m_axis_tready) begin
-				if (count > 8'd128) begin
-					in_reg <= in_reg >> 8'd128;
-				end
-				else if (s_axis_tvalid) begin
-					in_reg <= s_axis_tdata;
-				end
+			//if (m_axis_tready) begin
+				//if (count > 8'd128) begin
+					//in_reg <= in_reg >> 8'd128;
+				//end
+				//else if (s_axis_tvalid) begin
+					//in_reg <= s_axis_tdata;
+				//end
+			//end
+			//
+			if (count > 8'd128 && m_axis_tready) begin
+				in_reg <= in_reg >> 8'd128;
+			end
+			else if (count == 8'd128 && m_axis_tready && s_axis_tvalid) begin
+				in_reg <= s_axis_tdata;
+			end
+			else if (count == 8'd0 && s_axis_tvalid) begin
+				in_reg <= s_axis_tdata;
 			end
 		end
 	end
