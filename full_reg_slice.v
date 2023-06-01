@@ -20,7 +20,8 @@
 
 
 module full_reg_slice # (
-	parameter DWIDTH = 32
+	parameter DWIDTH = 32,
+	parameter TLAST_WIDTH = 1
 )
 (
 	input										clk,
@@ -29,10 +30,12 @@ module full_reg_slice # (
 	input		[DWIDTH-1:0]					s_in_tdata,
 	input										s_in_tvalid,
 	output	reg									s_in_tready,
+	input		[TLAST_WIDTH-1:0]				s_in_tlast,
 
 	output		[DWIDTH-1:0]					m_out_tdata,
 	output	reg									m_out_tvalid,
-	input										m_out_tready
+	input										m_out_tready,
+	output		[TLAST_WIDTH-1:0]				m_out_tlast
 );
 
 
@@ -43,6 +46,7 @@ module full_reg_slice # (
 	reg		[1:0]				c_state, n_state;
 
 	reg		[DWIDTH-1:0]		in_tdata_reg_0, in_tdata_reg_1;
+	reg		[TLAST_WIDTH-1:0]	in_tlast_reg_0, in_tlast_reg_1;
 	reg							ctrl_reg_0, ctrl_reg_1, empty, full;
 
 
@@ -169,14 +173,18 @@ module full_reg_slice # (
 		if (~rst_n) begin
 			in_tdata_reg_0 <= 0;
 			in_tdata_reg_1 <= 0;
+			in_tlast_reg_0 <= 0;
+			in_tlast_reg_1 <= 0;
 		end
 		else begin
 			if (s_in_tvalid & s_in_tready) begin
 				if (ctrl_reg_0) begin
 					in_tdata_reg_0 <= s_in_tdata;
+					in_tlast_reg_0 <= s_in_tlast;
 				end 
 				else begin
 					in_tdata_reg_1 <= s_in_tdata;
+					in_tlast_reg_1 <= s_in_tlast;
 				end
 			end
 		end
@@ -184,6 +192,7 @@ module full_reg_slice # (
 
 
 	assign m_out_tdata = ctrl_reg_1 ? in_tdata_reg_0 : in_tdata_reg_1;
+	assign m_out_tlast = ctrl_reg_1 ? in_tlast_reg_0 : in_tlast_reg_1;
 
 
 endmodule

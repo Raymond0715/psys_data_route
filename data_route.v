@@ -28,8 +28,9 @@ module data_route (
 	input										clk,
 	input										rst_n,
 
-	input	[17:0]								droute_switch_0,
-	input	[17:0]								droute_switch_1,
+	input	[17:0]								s_droute_switch_0,
+	input	[17:0]								s_droute_switch_1,
+	input										s_droute_switch_valid,
 
 	input	[1535:0]							s_in_a_tdata,
 	input										s_in_a_tvalid,
@@ -73,7 +74,7 @@ module data_route (
 	output										m_out_e_tvalid,
 	input										m_out_e_tready,
 	output	reg [15:0]							m_out_e_tkeep = 16'hffff,
-	output	reg									m_out_e_tlast = 1'b0,
+	output										m_out_e_tlast,
 
 	output	[1535:0]							m_out_f_tdata,
 	output										m_out_f_tvalid,
@@ -90,7 +91,22 @@ module data_route (
 );
 
 
+	reg		[17:0]				droute_switch_0, droute_switch_1;
+
+	always @(posedge clk) begin
+		if (~rst_n) begin
+			droute_switch_0 <= 18'h0;
+			droute_switch_1 <= 18'h0;
+		end
+		else if (s_droute_switch_valid) begin
+			droute_switch_0 <= s_droute_switch_0;
+			droute_switch_1 <= s_droute_switch_1;
+		end
+	end
+
+
 	wire	[1535:0]		in_d_tdata, in_e_tdata;
+	wire	[11:0]			in_d_tlast, in_e_tlast;
 	wire					in_d_tvalid, in_e_tvalid;
 	wire					in_d_tready_0, in_e_tready_0,
 							in_d_tready_1, in_e_tready_1;
@@ -127,15 +143,17 @@ module data_route (
 		.s_axis_tdata			( s_in_d_tdata ),
 		.s_axis_tvalid			( s_in_d_tvalid ),
 		.s_axis_tready			( s_in_d_tready ),
+		.s_axis_tlast			( s_in_d_tlast ),
 		.m_axis_tdata			( in_d_tdata ),
 		.m_axis_tvalid			( in_d_tvalid ),
-		.m_axis_tready			( in_d_tready_0 | in_d_tready_1 )
+		.m_axis_tready			( in_d_tready_0 | in_d_tready_1 ),
+		.m_axis_tlast			( in_d_tlast )
 	);
 
 
 `ifdef SIM_BD
 	wire	[127:0]			sim_in_e_tdata;
-	wire					sim_in_e_tvalid, sim_in_e_tready;
+	wire					sim_in_e_tvalid, sim_in_e_tready, sim_in_e_tlast;
 
 
 
@@ -149,7 +167,7 @@ module data_route (
 		.rst_n					( rst_n ),
 		.m_tdata				( sim_in_e_tdata ),
 		.m_tvalid				( sim_in_e_tvalid ),
-		.m_tlast				( ),
+		.m_tlast				( sim_in_e_tlast ),
 		.m_tready				( sim_in_e_tready )
 	);
 
@@ -163,21 +181,24 @@ module data_route (
 		.s_axis_tdata			( sim_in_e_tdata ),
 		.s_axis_tvalid			( sim_in_e_tvalid ),
 		.s_axis_tready			( sim_in_e_tready ),
+		.s_axis_tlast			( sim_in_e_tlast ),
 `else
 		.s_axis_tdata			( s_in_e_tdata ),
 		.s_axis_tvalid			( s_in_e_tvalid ),
 		.s_axis_tready			( s_in_e_tready ),
+		.s_axis_tlast			( s_in_e_tlast ),
 `endif
 		.m_axis_tdata			( in_e_tdata ),
 		.m_axis_tvalid			( in_e_tvalid ),
-		.m_axis_tready			( in_e_tready_0 | in_e_tready_1 )
+		.m_axis_tready			( in_e_tready_0 | in_e_tready_1 ),
+		.m_axis_tlast			( in_e_tlast )
 	);
 
 
 	inter_switch inter_switch_0 (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( droute_switch_0[17:0] ),
+		.ctrl					( droute_switch_0 ),
 
 		.s_in_a_tdata			( s_in_a_tdata  ),
 		.s_in_a_tvalid			( s_in_a_tvalid ),
@@ -191,9 +212,11 @@ module data_route (
 		.s_in_d_tdata			( in_d_tdata  ),
 		.s_in_d_tvalid			( in_d_tvalid ),
 		.s_in_d_tready			( in_d_tready_0 ),
+		.s_in_d_tlast			( in_d_tlast ),
 		.s_in_e_tdata			( in_e_tdata  ),
 		.s_in_e_tvalid			( in_e_tvalid ),
 		.s_in_e_tready			( in_e_tready_0 ),
+		.s_in_e_tlast			( in_e_tlast ),
 
 		.m_out					( switch_out_0 ),
 		.m_out_256				( switch_out_0_256 ),
@@ -208,6 +231,7 @@ module data_route (
 		.m_out_d_tready			( out_d_tready_0 ),
 		.m_out_e_tvalid			( out_e_tvalid_0 ),
 		.m_out_e_tready			( out_e_tready_0 ),
+		.m_out_e_tlast			( out_e_tlast_0 ),
 		.m_out_f_tvalid			( out_f_tvalid_0 ),
 		.m_out_f_tready			( out_f_tready_0 ),
 		.m_out_g_tvalid			( out_g_tvalid_0 ),
@@ -220,7 +244,7 @@ module data_route (
 	inter_switch inter_switch_1 (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( droute_switch_1[17:0] ),
+		.ctrl					( droute_switch_1 ),
 
 		.s_in_a_tdata			( s_in_a_tdata  ),
 		.s_in_a_tvalid			( s_in_a_tvalid ),
@@ -234,9 +258,11 @@ module data_route (
 		.s_in_d_tdata			( in_d_tdata  ),
 		.s_in_d_tvalid			( in_d_tvalid ),
 		.s_in_d_tready			( in_d_tready_1 ),
+		.s_in_d_tlast			( in_d_tlast ),
 		.s_in_e_tdata			( in_e_tdata  ),
 		.s_in_e_tvalid			( in_e_tvalid ),
 		.s_in_e_tready			( in_e_tready_1 ),
+		.s_in_e_tlast			( in_e_tlast ),
 
 		.m_out					( switch_out_1 ),
 		.m_out_256				( switch_out_1_256 ),
@@ -251,6 +277,7 @@ module data_route (
 		.m_out_d_tready			( out_d_tready_1 ),
 		.m_out_e_tvalid			( out_e_tvalid_1 ),
 		.m_out_e_tready			( out_e_tready_1 ),
+		.m_out_e_tlast			( out_e_tlast_1 ),
 		.m_out_f_tvalid			( out_f_tvalid_1 ),
 		.m_out_f_tready			( out_f_tready_1 ),
 		.m_out_g_tvalid			( out_g_tvalid_1 ),
@@ -341,16 +368,19 @@ module data_route (
 		.s_axis_tdata_0			( switch_out_0_128 ),
 		.s_axis_tvalid_0		( out_e_tvalid_0 ),
 		.s_axis_tready_0		( out_e_tready_0 ),
+		.s_axis_tlast_0			( out_e_tlast_0 ),
 		.s_axis_tdata_1			( switch_out_1_128 ),
 		.s_axis_tvalid_1		( out_e_tvalid_1 ),
 		.s_axis_tready_1		( out_e_tready_1 ),
+		.s_axis_tlast_1			( out_e_tlast_1 ),
 		.m_axis_tdata			( m_out_e_tdata ),
 		.m_axis_tvalid			( m_out_e_tvalid ),
 `ifdef SIM_BD
-		.m_axis_tready			( 1 )
+		.m_axis_tready			( 1 ),
 `else
-		.m_axis_tready			( m_out_e_tready )
+		.m_axis_tready			( m_out_e_tready ),
 `endif
+		.m_axis_tlast			( m_out_e_tlast )
 	);
 
 

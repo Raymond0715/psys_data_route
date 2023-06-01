@@ -26,14 +26,15 @@ module in128_out1536 (
 	input	[127:0]								s_axis_tdata,
 	input										s_axis_tvalid,
 	output	reg									s_axis_tready,
+	input										s_axis_tlast,
 
-	output	[1535:0]							m_axis_tdata,
+	output	reg [1535:0]						m_axis_tdata,
 	output	reg									m_axis_tvalid,
-	input										m_axis_tready
+	input										m_axis_tready,
+	output	reg [11:0]							m_axis_tlast
 );
 
 
-	reg		[1535:0]		in_reg;
 	reg		[10:0]			count;
 
 
@@ -103,18 +104,19 @@ module in128_out1536 (
 
 	always @(posedge clk) begin
 		if (~rst_n) begin
-			in_reg <= 1536'd0;
+			m_axis_tdata <= 1536'h0;
+			m_axis_tlast <= 12'h0;
 		end
 		else begin
 			if (s_axis_tvalid & s_axis_tready && count < 11'd1535) begin
-				in_reg <= in_reg >> 8'd128;
-				in_reg[1535:1408] <= s_axis_tdata;
+				m_axis_tdata <= m_axis_tdata >> 8'd128;
+				m_axis_tdata[1535:1408] <= s_axis_tdata;
+
+				m_axis_tlast <= m_axis_tlast >> 1'b1;
+				m_axis_tlast[11] <= s_axis_tlast;
 			end
 		end
 	end
-
-
-	assign m_axis_tdata = in_reg;
 
 
 endmodule

@@ -1,5 +1,3 @@
-// There may be error in tready signal. Behaviour simulation is different from
-// block design simulation.
 `timescale 1ns/1ps
 
 
