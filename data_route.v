@@ -29,8 +29,9 @@ module data_route (
 	input										rst_n,
 
 	input	[17:0]								s_droute_switch_0,
+	output										count_switch_0_tvalid,
 	input	[17:0]								s_droute_switch_1,
-	input										s_droute_switch_valid,
+	output										count_switch_1_tvalid,
 
 	input	[1535:0]							s_in_a_tdata,
 	input										s_in_a_tvalid,
@@ -89,20 +90,6 @@ module data_route (
 	input										m_out_h_tready
 
 );
-
-
-	reg		[17:0]				droute_switch_0, droute_switch_1;
-
-	always @(posedge clk) begin
-		if (~rst_n) begin
-			droute_switch_0 <= 18'h0;
-			droute_switch_1 <= 18'h0;
-		end
-		else if (s_droute_switch_valid) begin
-			droute_switch_0 <= s_droute_switch_0;
-			droute_switch_1 <= s_droute_switch_1;
-		end
-	end
 
 
 	wire	[1535:0]		in_d_tdata, in_e_tdata;
@@ -198,7 +185,7 @@ module data_route (
 	inter_switch inter_switch_0 (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( droute_switch_0 ),
+		.ctrl					( s_droute_switch_0 ),
 
 		.s_in_a_tdata			( s_in_a_tdata  ),
 		.s_in_a_tvalid			( s_in_a_tvalid ),
@@ -244,7 +231,7 @@ module data_route (
 	inter_switch inter_switch_1 (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.ctrl					( droute_switch_1 ),
+		.ctrl					( s_droute_switch_1 ),
 
 		.s_in_a_tdata			( s_in_a_tdata  ),
 		.s_in_a_tvalid			( s_in_a_tvalid ),

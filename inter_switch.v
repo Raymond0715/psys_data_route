@@ -82,7 +82,7 @@ module inter_switch (
 
 
 
-	wire	[7:0]			switch_in_en;
+	wire	[4:0]			switch_in_en;
 	wire	[7:0]			switch_out_en;
 
 	// Input
@@ -150,10 +150,11 @@ module inter_switch (
 	assign s_in_e_tready = switch_in_en[0] & s_inter_tready;
 
 
-	decoder_3_8 switch_in (
-		.in					( ctrl[2:0] ),
-		.out				( switch_in_en )
-	);
+	assign switch_in_en[0] = ~ctrl[2] & ~ctrl[1] &  ctrl[0];
+	assign switch_in_en[1] = ~ctrl[2] &  ctrl[1] & ~ctrl[0];
+	assign switch_in_en[2] = ~ctrl[2] &  ctrl[1] &  ctrl[0];
+	assign switch_in_en[3] =  ctrl[2] & ~ctrl[1] & ~ctrl[0];
+	assign switch_in_en[4] =  ctrl[2] & ~ctrl[1] &  ctrl[0];
 
 
 	// Inter
@@ -205,6 +206,14 @@ module inter_switch (
 		.in					( ctrl[5:3] ),
 		.out				( switch_out_en )
 	);
+	assign switch_out_en[0] = ~ctrl[5] & ~ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
+	assign switch_out_en[1] = ~ctrl[5] & ~ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
+	assign switch_out_en[2] = ~ctrl[5] &  ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
+	assign switch_out_en[3] = ~ctrl[5] &  ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
+	assign switch_out_en[4] =  ctrl[5] & ~ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
+	assign switch_out_en[5] =  ctrl[5] & ~ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
+	assign switch_out_en[6] =  ctrl[5] &  ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
+	assign switch_out_en[7] =  ctrl[5] &  ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
 
 
 	in1536_out128 dwidth_converter_out (

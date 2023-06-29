@@ -75,8 +75,8 @@ module data_gen # (
 				begin
 					delay1 = 10 * ( {$random} % 60 );
 					delay2 = 10 * ( {$random} % 60 );
-					# delay1 m_tvalid_reg = 1;
-					# delay2 m_tvalid_reg = 0;
+					# delay1 m_tvalid_reg <= 1;
+					# delay2 m_tvalid_reg <= 0;
 				end
 		end
 

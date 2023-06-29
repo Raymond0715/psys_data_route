@@ -8,7 +8,7 @@ module tb_data_route;
 	reg		clk = 1;
 	reg		rst_n = 0;
 
-	parameter PERIOD = 10;
+	parameter PERIOD = 5;
 
 	initial
 	begin
@@ -123,9 +123,10 @@ module tb_data_route;
 
 
 	reg sim_out_e_tready_reg=0;
+	reg sim_out_e_tready_reg_pad;
 	wire out_tready_e;
 
-	assign out_tready_e = sim_out_e_tready_reg;
+	assign out_tready_e = sim_out_e_tready_reg_pad;
 
 	integer delay1, delay2, k;
 	initial
@@ -134,10 +135,14 @@ module tb_data_route;
 				begin
 					delay1 = 10 * ( {$random} % 60 );
 					delay2 = 10 * ( {$random} % 60 );
-					# delay1 sim_out_e_tready_reg <= 1;
-					# delay2 sim_out_e_tready_reg <= 0;
+					# delay1 sim_out_e_tready_reg = 1;
+					# delay2 sim_out_e_tready_reg = 0;
 				end
 		end
+
+	always @(posedge clk) begin
+		sim_out_e_tready_reg_pad <= sim_out_e_tready_reg;
+	end
 
 
 	data_route data_route_inst (
