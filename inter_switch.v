@@ -27,6 +27,7 @@ module inter_switch (
 	input										rst_n,
 
 	input	[17:0]								ctrl,
+	output										count_switch_tvalid,
 
 	input	[1535:0]							s_in_a_tdata,
 	input										s_in_a_tvalid,
@@ -51,8 +52,9 @@ module inter_switch (
 	input	[11:0]								s_in_e_tlast,
 
 	output	[1535:0]							m_out,
+	output	[127:0]								m_out_128_d,
+	output	[127:0]								m_out_128_e,
 	output	[255:0]								m_out_256,
-	output	[127:0]								m_out_128,
 
 	output										m_out_a_tvalid,
 	input										m_out_a_tready,
@@ -82,6 +84,7 @@ module inter_switch (
 
 
 
+	reg		[17:0]			m_ctrl, m_ctrl_skid;
 	wire	[4:0]			switch_in_en;
 	wire	[7:0]			switch_out_en;
 
@@ -96,8 +99,9 @@ module inter_switch (
 	wire	[11:0]			s_inter_tlast;
 	wire					s_inter_tvalid, s_inter_tready;
 
+	wire	[1565:0]		m_inter_tdata_bus;
 	wire	[1535:0]		m_inter_tdata;
-	wire	[11:0]			m_inter_tlast;
+	wire	[11:0]			m_inter_tlast, m_inter_tlast_switch;
 	wire					m_inter_tvalid, m_inter_tready;
 
 
@@ -123,24 +127,29 @@ module inter_switch (
 					| in_e_tvalid;
 
 	assign s_inter_tlast = in_d_tlast | in_e_tlast;
+	
 
-
-	full_reg_slice # (
-		.DWIDTH					(1536),
-		.TLAST_WIDTH			(12)
+	axi_register_slice_v2_1_axic_register_slice # (
+		.C_DATA_WIDTH			(1548),
+		.C_REG_CONFIG			(1)
 	)
 	inter_reg_slice (
-		.clk					( clk ),
-		.rst_n					( rst_n ),
-		.s_in_tdata				( s_inter_tdata ),
-		.s_in_tvalid			( s_inter_tvalid ),
-		.s_in_tready			( s_inter_tready ),
-		.s_in_tlast				( s_inter_tlast ),
-		.m_out_tdata			( m_inter_tdata ),
-		.m_out_tvalid			( m_inter_tvalid ),
-		.m_out_tready			( m_inter_tready ),
-		.m_out_tlast			( m_inter_tlast )
+		.ACLK					( clk ),
+		.ARESET					( ~rst_n ),
+		.S_PAYLOAD_DATA			( {s_inter_tlast, s_inter_tdata} ),
+		.S_VALID				( s_inter_tvalid ),
+		.S_READY				( s_inter_tready ),
+		.M_PAYLOAD_DATA			( m_inter_tdata_bus ),
+		.M_VALID				( m_inter_tvalid ),
+		.M_READY				( m_inter_tready )
 	);
+
+
+	assign m_inter_tdata = m_inter_tdata_bus[1535:0];
+	assign m_inter_tlast = m_inter_tdata_bus[1547:1536];
+	assign m_inter_tlast_switch =
+		switch_out_en[3] ? m_inter_tlast_switch : 12'h0;
+	assign count_switch_tvalid = s_inter_tvalid & s_inter_tready;
 
 
 	assign s_in_a_tready = switch_in_en[4] & s_inter_tready;
@@ -159,88 +168,118 @@ module inter_switch (
 
 	// Inter
 	wire					out_a_tready, out_b_tready, out_c_tready,
-							out_d_tready, out_e_tready, out_f_tready,
-							out_g_tready, out_h_tready;
+							out_f_tready, out_g_tready;
 
-	wire					inter_128_tready;
+	wire					inter_128_tready_d, inter_128_tready_e;
 
 	wire					inter_tready_256_flex;
 
 	assign m_inter_tready = out_a_tready | out_b_tready | out_c_tready
-					   | out_f_tready | out_g_tready
-					   | inter_128_tready | inter_tready_256_flex;
+						 | out_f_tready | out_g_tready
+						 | (inter_128_tready_d & switch_out_en[4])
+						 | (inter_128_tready_e & switch_out_en[3])
+						 | (inter_tready_256_flex & switch_out_en[0]);
 
 	assign out_a_tready = switch_out_en[7] & m_out_a_tready;
 	assign out_b_tready = switch_out_en[6] & m_out_b_tready;
 	assign out_c_tready = switch_out_en[5] & m_out_c_tready;
-	assign out_d_tready = switch_out_en[4] & m_out_d_tready;
-	assign out_e_tready = switch_out_en[3] & m_out_e_tready;
 	assign out_f_tready = switch_out_en[2] & m_out_f_tready;
 	assign out_g_tready = switch_out_en[1] & m_out_g_tready;
-	assign out_h_tready = switch_out_en[0] & m_out_h_tready;
 
 
 	// Output
 	wire	[255:0]			out_inter_tdata_256_flex;
-	wire	[127:0]			out_inter_128_tdata;
-	wire 					out_inter_128_tvalid, out_inter_tvalid_256_flex;
-	wire					out_inter_128_tlast;
+	wire	[127:0]			out_inter_128_tdata_d, out_inter_128_tdata_e;
+	wire 					out_inter_128_tvalid_d, out_inter_128_tvalid_e,
+							out_inter_tvalid_256_flex;
 
 
 	assign m_out = m_inter_tdata;
-	assign m_out_128 = out_inter_128_tdata;
+	assign m_out_128_d = out_inter_128_tdata_d;
+	assign m_out_128_e = out_inter_128_tdata_e;
 	assign m_out_256 = out_inter_tdata_256_flex;
 	assign m_out_a_tvalid = switch_out_en[7] & m_inter_tvalid;
 	assign m_out_b_tvalid = switch_out_en[6] & m_inter_tvalid;
 	assign m_out_c_tvalid = switch_out_en[5] & m_inter_tvalid;
-	assign m_out_d_tvalid = switch_out_en[4] & out_inter_128_tvalid;
-	assign m_out_e_tvalid = switch_out_en[3] & out_inter_128_tvalid;
+	assign m_out_d_tvalid = out_inter_128_tvalid_d;
+	assign m_out_e_tvalid = out_inter_128_tvalid_e;
 	assign m_out_f_tvalid = switch_out_en[2] & m_inter_tvalid;
 	assign m_out_g_tvalid = switch_out_en[1] & m_inter_tvalid;
-	assign m_out_h_tvalid = switch_out_en[0] & out_inter_tvalid_256_flex;
-
-	assign m_out_e_tlast = switch_out_en[3] & out_inter_128_tlast;
+	assign m_out_h_tvalid = out_inter_tvalid_256_flex;
 
 
-	decoder_3_8 switch_out (
-		.in					( ctrl[5:3] ),
-		.out				( switch_out_en )
-	);
-	assign switch_out_en[0] = ~ctrl[5] & ~ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
-	assign switch_out_en[1] = ~ctrl[5] & ~ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
-	assign switch_out_en[2] = ~ctrl[5] &  ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
-	assign switch_out_en[3] = ~ctrl[5] &  ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
-	assign switch_out_en[4] =  ctrl[5] & ~ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
-	assign switch_out_en[5] =  ctrl[5] & ~ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
-	assign switch_out_en[6] =  ctrl[5] &  ctrl[4] & ~ctrl[3] && ctrl[2:0] != 3'b0;
-	assign switch_out_en[7] =  ctrl[5] &  ctrl[4] &  ctrl[3] && ctrl[2:0] != 3'b0;
+	always @(posedge clk) begin
+		if (~rst_n) begin
+			m_ctrl <= 18'h0;
+			m_ctrl_skid <= 18'h0;
+		end
+		else begin
+			if (m_inter_tready | ~m_inter_tvalid) begin
+				m_ctrl <= s_inter_tready ? ctrl : m_ctrl_skid;
+			end
+
+			if (s_inter_tready) begin
+				m_ctrl_skid <= ctrl;
+			end
+		end
+	end
 
 
-	in1536_out128 dwidth_converter_out (
+	assign switch_out_en[0] =
+		~m_ctrl[5] & ~m_ctrl[4] & ~m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+	assign switch_out_en[1] =
+		~m_ctrl[5] & ~m_ctrl[4] &  m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+	assign switch_out_en[2] =
+		~m_ctrl[5] &  m_ctrl[4] & ~m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+	assign switch_out_en[3] =
+		~m_ctrl[5] &  m_ctrl[4] &  m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+	assign switch_out_en[4] =
+		m_ctrl[5] & ~m_ctrl[4] & ~m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+	assign switch_out_en[5] =
+		m_ctrl[5] & ~m_ctrl[4] &  m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+	assign switch_out_en[6] =
+		m_ctrl[5] &  m_ctrl[4] & ~m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+	assign switch_out_en[7] =
+		m_ctrl[5] &  m_ctrl[4] &  m_ctrl[3] && m_ctrl[2:0] != 3'b0;
+
+
+	in1536_out128 dwidth_converter_out_d (
 		.clk				( clk ),
 		.rst_n				( rst_n ),
 		.s_axis_tdata		( m_inter_tdata ),
-		.s_axis_tvalid		( m_inter_tvalid & (switch_out_en[3] | switch_out_en[4]) ),
-		.s_axis_tready		( inter_128_tready ),
-		.s_axis_tlast		( m_inter_tlast ),
-		.m_axis_tdata		( out_inter_128_tdata ),
-		.m_axis_tvalid		( out_inter_128_tvalid ),
-		.m_axis_tready		( out_d_tready | out_e_tready ),
-		.m_axis_tlast		( out_inter_128_tlast )
+		.s_axis_tvalid		( m_inter_tvalid & switch_out_en[4] ),
+		.s_axis_tready		( inter_128_tready_d ),
+		.m_axis_tdata		( out_inter_128_tdata_d ),
+		.m_axis_tvalid		( out_inter_128_tvalid_d ),
+		.m_axis_tready		( m_out_d_tready )
+	);
+
+
+	in1536_out128 dwidth_converter_out_e (
+		.clk				( clk ),
+		.rst_n				( rst_n ),
+		.s_axis_tdata		( m_inter_tdata ),
+		.s_axis_tvalid		( m_inter_tvalid & switch_out_en[3] ),
+		.s_axis_tready		( inter_128_tready_e ),
+		.s_axis_tlast		( m_inter_tlast_switch ),
+		.m_axis_tdata		( out_inter_128_tdata_e ),
+		.m_axis_tvalid		( out_inter_128_tvalid_e ),
+		.m_axis_tready		( m_out_e_tready ),
+		.m_axis_tlast		( m_out_e_tlast )
 	);
 
 
 	in1536_out256_flex dwidth_converter_out_flex (
 		.clk				( clk ),
 		.rst_n				( rst_n ),
-		.shift_ctrl			( ctrl[8:6] ),
-		.shift_reg			( ctrl[17:9] ),
+		.shift_ctrl			( m_ctrl[8:6] ),
+		.shift_reg			( m_ctrl[17:9] ),
 		.s_axis_tdata		( m_inter_tdata ),
-		.s_axis_tvalid		( m_inter_tvalid ),
+		.s_axis_tvalid		( m_inter_tvalid & switch_out_en[0] ),
 		.s_axis_tready		( inter_tready_256_flex ),
 		.m_axis_tdata		( out_inter_tdata_256_flex ),
 		.m_axis_tvalid		( out_inter_tvalid_256_flex ),
-		.m_axis_tready		( out_h_tready )
+		.m_axis_tready		( m_out_h_tready )
 	);
 
 

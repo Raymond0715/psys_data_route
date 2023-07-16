@@ -50,7 +50,7 @@ module data_gen # (
 	end
 
 	// ----------------------------------------------------------
-	reg [64:0]      count   = 64'b0   ;
+	reg [63:0]      count   = 64'b0   ;
 	reg             valid_ctrl = 0 ;
 
 
@@ -73,8 +73,8 @@ module data_gen # (
 		begin
 			for (k = 0; k < 100; k = k+1)
 				begin
-					delay1 = 10 * ( {$random} % 60 );
-					delay2 = 10 * ( {$random} % 60 );
+					delay1 = 5 * ( {$random} % 60 );
+					delay2 = 5 * ( {$random} % 60 );
 					# delay1 m_tvalid_reg <= 1;
 					# delay2 m_tvalid_reg <= 0;
 				end

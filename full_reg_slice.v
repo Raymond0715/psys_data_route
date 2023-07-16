@@ -68,7 +68,8 @@ module full_reg_slice # (
 			case(c_state)
 				EMPTY:
 					begin
-						if ((s_in_tvalid & s_in_tready) & ~(m_out_tvalid & m_out_tready)) begin
+						if ((s_in_tvalid & s_in_tready)
+								& ~(m_out_tvalid & m_out_tready)) begin
 							n_state = RUN;
 						end
 						else begin
@@ -78,10 +79,12 @@ module full_reg_slice # (
 
 				RUN:
 					begin
-						if (~(s_in_tready & s_in_tvalid) & m_out_tready & m_out_tvalid) begin
+						if (~(s_in_tready & s_in_tvalid) & m_out_tready
+								& m_out_tvalid) begin
 							n_state = EMPTY;
 						end
-						else if (s_in_tready & s_in_tvalid & ~(m_out_tready & m_out_tvalid)) begin
+						else if (s_in_tready & s_in_tvalid & ~(m_out_tready
+								& m_out_tvalid)) begin
 							n_state = FULL;
 						end
 						else begin
@@ -91,7 +94,8 @@ module full_reg_slice # (
 
 				FULL:
 					begin
-						if (~(s_in_tready & s_in_tvalid) & m_out_tready & m_out_tvalid) begin
+						if (~(s_in_tready & s_in_tvalid) & m_out_tready
+								& m_out_tvalid) begin
 							n_state = RUN;
 						end
 						else begin
@@ -109,14 +113,16 @@ module full_reg_slice # (
 			ctrl_reg_1 <= 1'd0;
 		end
 		else begin
-			if (c_state == RUN && n_state == FULL && (ctrl_reg_0 == ctrl_reg_1)) begin
+			if (c_state == RUN && n_state == FULL
+					&& (ctrl_reg_0 == ctrl_reg_1)) begin
 				ctrl_reg_0 = ~ctrl_reg_0;
 			end
 			if (c_state == FULL && n_state == RUN) begin
 				ctrl_reg_0 = ~ctrl_reg_0;
 				ctrl_reg_1 = ~ctrl_reg_1;
 			end
-			if (c_state == RUN && (m_out_tready & m_out_tvalid) && (ctrl_reg_0 != ctrl_reg_1)) begin
+			if (c_state == RUN && (m_out_tready & m_out_tvalid)
+					&& (ctrl_reg_0 != ctrl_reg_1)) begin
 				ctrl_reg_1 = ~ctrl_reg_1;
 			end
 		end

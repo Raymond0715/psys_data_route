@@ -26,8 +26,11 @@ module tb_data_route;
 	wire	[1535:0]		in_tdata_a, in_tdata_b, in_tdata_c;
 	wire	[127:0]			in_tdata_d, in_tdata_e;
 
+	wire	[4:0]			in_valid;
+
 	wire		in_tvalid_a, in_tvalid_b, in_tvalid_c, in_tvalid_d, in_tvalid_e;
 	wire		in_tready_a, in_tready_b, in_tready_c, in_tready_d, in_tready_e;
+	wire		count_switch_0_tvalid, count_switch_1_tvalid;
 
 	wire	[1535:0]		out_tdata_a, out_tdata_b, out_tdata_c, out_tdata_f;
 	wire	[1279:0]		out_tdata_g;
@@ -148,8 +151,12 @@ module tb_data_route;
 	data_route data_route_inst (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
-		.droute_switch_0		( 36'h10099 ),
-		.droute_switch_1		( 36'h8048 ),
+
+		.s_droute_switch_0		( 18'h21 ),
+		.count_switch_0_tvalid	( count_switch_0_tvalid ),
+		.s_droute_switch_1		( 18'h0 ),
+		.count_switch_1_tvalid	( count_switch_1_tvalid ),
+		.in_valid				( in_valid ),
 
 		.s_in_a_tdata			( in_tdata_a  ),
 		.s_in_a_tvalid			( in_tvalid_a ),
