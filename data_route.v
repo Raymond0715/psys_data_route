@@ -35,6 +35,8 @@ module data_route (
 
 	output	[5:0]								in_valid,
 
+	input										dic_mode,
+
 	input	[127:0]								s_in_a_tdata,
 	input										s_in_a_tvalid,
 	output										s_in_a_tready,
@@ -78,17 +80,21 @@ module data_route (
 	output										m_out_e_tvalid,
 	input										m_out_e_tready,
 
-	output	[1535:0]							m_out_f_tdata,
-	output										m_out_f_tvalid,
-	input										m_out_f_tready,
+	output	[1535:0]							m_out_dic_a_tdata,
+	output										m_out_dic_a_tvalid,
+	input										m_out_dic_a_tready,
 
-	output	[1279:0]							m_out_g_tdata,
-	output										m_out_g_tvalid,
-	input										m_out_g_tready,
+	output	[1535:0]							m_out_dic_b_tdata,
+	output										m_out_dic_b_tvalid,
+	input										m_out_dic_b_tready,
 
-	output	[255:0]								m_out_h_tdata,
-	output										m_out_h_tvalid,
-	input										m_out_h_tready,
+	output	[1535:0]							m_out_dic_c_tdata,
+	output										m_out_dic_c_tvalid,
+	input										m_out_dic_c_tready,
+
+	output	[255:0]								m_out_dic_d_tdata,
+	output										m_out_dic_d_tvalid,
+	input										m_out_dic_d_tready,
 
 	input	[1535:0]							s_in_i_tdata,
 	input										s_in_i_tvalid,
@@ -127,6 +133,14 @@ module data_route (
 	wire					in_a_tready_0, in_b_tready_0,
 							in_a_tready_1, in_b_tready_1,
 							in_a_tready_2, in_b_tready_2;
+
+	wire	[1535:0]		in_f_tdata;
+	wire	[1279:0]		in_g_tdata;
+	wire	[255:0]			in_h_tdata;
+	
+	wire					in_f_tvalid, in_f_tready,
+							in_g_tvalid, in_g_tready,
+							in_h_tvalid, in_h_tready;
 
 	wire	[1535:0]		switch_out_0, switch_out_1, switch_out_2;
 	wire	[255:0]			switch_out_0_256, switch_out_1_256, switch_out_2_256;
@@ -490,9 +504,9 @@ module data_route (
 		.s_axis_tdata_2			( switch_out_2 ),
 		.s_axis_tvalid_2		( out_f_tvalid_2 ),
 		.s_axis_tready_2		( out_f_tready_2 ),
-		.m_axis_tdata			( m_out_f_tdata ),
-		.m_axis_tvalid			( m_out_f_tvalid ),
-		.m_axis_tready			( m_out_f_tready )
+		.m_axis_tdata			( in_f_tdata ),
+		.m_axis_tvalid			( in_f_tvalid ),
+		.m_axis_tready			( in_f_tready )
 	);
 
 
@@ -520,12 +534,12 @@ module data_route (
 		.s_axis_256_tvalid_2	( out_h_tvalid_2 ),
 		.s_axis_256_tready_2	( out_h_tready_2 ),
 
-		.m_axis_g_tdata			( m_out_g_tdata ),
-		.m_axis_g_tvalid		( m_out_g_tvalid ),
-		.m_axis_g_tready		( m_out_g_tready ),
-		.m_axis_h_tdata			( m_out_h_tdata ),
-		.m_axis_h_tvalid		( m_out_h_tvalid ),
-		.m_axis_h_tready		( m_out_h_tready )
+		.m_axis_g_tdata			( in_g_tdata ),
+		.m_axis_g_tvalid		( in_g_tvalid ),
+		.m_axis_g_tready		( in_g_tready ),
+		.m_axis_h_tdata			( in_h_tdata ),
+		.m_axis_h_tvalid		( in_h_tvalid ),
+		.m_axis_h_tready		( in_h_tready )
 	);
 
 
@@ -549,31 +563,32 @@ module data_route (
 		.m_axis_tready			( m_out_i_tready )
 	);
 
-	//data_interconnect_0 data_interconnect_0_inst (
-		//.ctrl					( ctrl ),
-		//.s_in_f_tdata			( ),
-		//.s_in_f_tvalid			( ),
-		//.s_in_f_tready			( ),
-		//.s_in_g_tdata			( ),
-		//.s_in_g_tvalid			( ),
-		//.s_in_g_tready			( ),
-		//.s_in_h_tdata			( ),
-		//.s_in_h_tvalid			( ),
-		//.s_in_h_tready			( ),
+	data_interconnect_0 data_interconnect_0_inst (
+		.mode					( dic_mode ),
 
-		//.m_out_dic_a_tdata		( ),
-		//.m_out_dic_a_tvalid		( ),
-		//.m_out_dic_a_tready		( ),
-		//.m_out_dic_b_tdata		( ),
-		//.m_out_dic_b_tvalid		( ),
-		//.m_out_dic_b_tready		( ),
-		//.m_out_dic_c_tdata		( ),
-		//.m_out_dic_c_tvalid		( ),
-		//.m_out_dic_c_tready		( ),
-		//.m_out_dic_d_tdata		( ),
-		//.m_out_dic_d_tvalid		( ),
-		//.m_out_dic_d_tready		( )
-	//);
+		.s_in_f_tdata			( in_f_tdata  ),
+		.s_in_f_tvalid			( in_f_tvalid ),
+		.s_in_f_tready			( in_f_tready ),
+		.s_in_g_tdata			( in_g_tdata  ),
+		.s_in_g_tvalid			( in_g_tvalid ),
+		.s_in_g_tready			( in_g_tready ),
+		.s_in_h_tdata			( in_h_tdata  ),
+		.s_in_h_tvalid			( in_h_tvalid ),
+		.s_in_h_tready			( in_h_tready ),
+
+		.m_out_dic_a_tdata		( m_out_dic_a_tdata  ),
+		.m_out_dic_a_tvalid		( m_out_dic_a_tvalid ),
+		.m_out_dic_a_tready		( m_out_dic_a_tready ),
+		.m_out_dic_b_tdata		( m_out_dic_b_tdata  ),
+		.m_out_dic_b_tvalid		( m_out_dic_b_tvalid ),
+		.m_out_dic_b_tready		( m_out_dic_b_tready ),
+		.m_out_dic_c_tdata		( m_out_dic_c_tdata  ),
+		.m_out_dic_c_tvalid		( m_out_dic_c_tvalid ),
+		.m_out_dic_c_tready		( m_out_dic_c_tready ),
+		.m_out_dic_d_tdata		( m_out_dic_d_tdata  ),
+		.m_out_dic_d_tvalid		( m_out_dic_d_tvalid ),
+		.m_out_dic_d_tready		( m_out_dic_d_tready )
+	);
 
 
 `ifdef SIM_BD
