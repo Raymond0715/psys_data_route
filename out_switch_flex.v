@@ -41,6 +41,14 @@ module out_switch_flex (
 	input										s_axis_256_tvalid_1,
 	output										s_axis_256_tready_1,
 
+	input	[1535:0]							s_axis_tdata_2,
+	input										s_axis_tvalid_2,
+	output										s_axis_tready_2,
+
+	input	[255:0]								s_axis_256_tdata_2,
+	input										s_axis_256_tvalid_2,
+	output										s_axis_256_tready_2,
+
 	output	[1279:0]							m_axis_g_tdata,
 	output										m_axis_g_tvalid,
 	input										m_axis_g_tready,
@@ -51,25 +59,32 @@ module out_switch_flex (
 );
 
 
-	wire	[1279:0]		data_g, data_g_0, data_g_1;
-	wire	[255:0]			data_h, data_h_0, data_h_1, data_h_256_0, data_h_256_1;
+	wire	[1279:0]		data_g, data_g_0, data_g_1, data_g_2;
+	wire	[255:0]			data_h, data_h_0, data_h_1, data_h_2, 
+							data_h_256_0, data_h_256_1, data_h_256_2;
 	wire					valid_g, valid_h, ready_g, ready_h;
 
 
 	assign data_g_0 = s_axis_tvalid_0 ? s_axis_tdata_0[1535:256] : 0;
 	assign data_g_1 = s_axis_tvalid_1 ? s_axis_tdata_1[1535:256] : 0;
+	assign data_g_2 = s_axis_tvalid_2 ? s_axis_tdata_2[1535:256] : 0;
 
 	assign data_h_0 = s_axis_tvalid_0 ? s_axis_tdata_0[255:0] : 0;
 	assign data_h_1 = s_axis_tvalid_1 ? s_axis_tdata_1[255:0] : 0;
+	assign data_h_2 = s_axis_tvalid_2 ? s_axis_tdata_2[255:0] : 0;
+
 	assign data_h_256_0 = s_axis_256_tvalid_0 ? s_axis_256_tdata_0[255:0] : 0;
 	assign data_h_256_1 = s_axis_256_tvalid_1 ? s_axis_256_tdata_1[255:0] : 0;
+	assign data_h_256_2 = s_axis_256_tvalid_2 ? s_axis_256_tdata_2[255:0] : 0;
 
 
-	assign data_g = data_g_0 | data_g_1;
-	assign data_h = data_h_0 | data_h_1 | data_h_256_0 | data_h_256_1;
-	assign valid_g = s_axis_tvalid_0 | s_axis_tvalid_1;
-	assign valid_h = s_axis_tvalid_0 | s_axis_tvalid_1
-				  | s_axis_256_tvalid_0 | s_axis_256_tvalid_1;
+	assign data_g = data_g_0 | data_g_1 | data_g_2;
+	assign data_h = data_h_0 | data_h_1 | data_h_2
+				 | data_h_256_0 | data_h_256_1 | data_h_256_2;
+	assign valid_g = s_axis_tvalid_0 | s_axis_tvalid_1 | s_axis_tvalid_2;
+	assign valid_h = s_axis_tvalid_0 | s_axis_tvalid_1 | s_axis_tvalid_2
+				  | s_axis_256_tvalid_0 | s_axis_256_tvalid_1
+				  | s_axis_256_tvalid_2;
 
 
 	axi_register_slice_v2_1_axic_register_slice # (

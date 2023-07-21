@@ -23,37 +23,39 @@ module tb_data_route;
 
 
 	// Logic
-	wire	[1535:0]		in_tdata_a, in_tdata_b, in_tdata_c;
-	wire	[127:0]			in_tdata_d, in_tdata_e;
+	wire	[1535:0]		in_tdata_c, in_tdata_d, in_tdata_e, in_tdata_i;
+	wire	[127:0]			in_tdata_a, in_tdata_b;
 
-	wire	[4:0]			in_valid;
+	wire	[5:0]			in_valid;
 
 	wire		in_tvalid_a, in_tvalid_b, in_tvalid_c, in_tvalid_d, in_tvalid_e;
 	wire		in_tready_a, in_tready_b, in_tready_c, in_tready_d, in_tready_e;
-	wire		count_switch_0_tvalid, count_switch_1_tvalid;
+	wire		count_switch_0_tvalid, count_switch_1_tvalid, count_switch_2_tvalid;
 
-	wire	[1535:0]		out_tdata_a, out_tdata_b, out_tdata_c, out_tdata_f;
+	wire	[1535:0]		out_tdata_c, out_tdata_d, out_tdata_e, out_tdata_f, out_tdata_i;
 	wire	[1279:0]		out_tdata_g;
 	wire	[255:0]			out_tdata_h;
-	wire	[127:0]			out_tdata_d, out_tdata_e;
+	wire	[127:0]			out_tdata_a, out_tdata_b;
 
 	wire		out_tvalid_a, out_tvalid_b, out_tvalid_c, out_tvalid_d,
-				out_tvalid_e, out_tvalid_f, out_tvalid_g, out_tvalid_h;
+				out_tvalid_e, out_tvalid_f, out_tvalid_g, out_tvalid_h,
+				out_tvalid_i;
 
-	reg			out_tready_a = 1;
 	reg			out_tready_b = 1;
 	reg			out_tready_c = 1;
 	reg			out_tready_d = 1;
+	reg			out_tready_e = 1;
 	reg			out_tready_f = 1;
 	reg			out_tready_g = 1;
 	reg			out_tready_h = 1;
+	reg			out_tready_i = 1;
 
 
 	// input a
 	data_gen # (
-		.WIDTH					( 1536	),
-		.LENGTH					( 10	),
-		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_a.txt")
+		.WIDTH					( 128	),
+		.LENGTH					( 120	),
+		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_a.txt")
 	)
 	in_gen_a (
 		.clk					( clk		),
@@ -66,9 +68,9 @@ module tb_data_route;
 
 	// input b
 	data_gen # (
-		.WIDTH					( 1536	),
-		.LENGTH					( 10	),
-		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_b.txt")
+		.WIDTH					( 128	),
+		.LENGTH					( 768	),
+		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_b.txt")
 	)
 	in_gen_b (
 		.clk					( clk		),
@@ -83,7 +85,7 @@ module tb_data_route;
 	data_gen # (
 		.WIDTH					( 1536	),
 		.LENGTH					( 10	),
-		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_c.txt")
+		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_c.txt")
 	)
 	in_gen_c (
 		.clk					( clk		),
@@ -96,9 +98,9 @@ module tb_data_route;
 
 	// input d
 	data_gen # (
-		.WIDTH					( 128	),
-		.LENGTH					( 768	),
-		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_d.txt")
+		.WIDTH					( 1536	),
+		.LENGTH					( 10	),
+		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_d.txt")
 	)
 	in_gen_d (
 		.clk					( clk		),
@@ -111,9 +113,9 @@ module tb_data_route;
 
 	// input e
 	data_gen # (
-		.WIDTH					( 128	),
-		.LENGTH					( 120	),
-		.DPATH 					( "/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/input_e.txt")
+		.WIDTH					( 1536	),
+		.LENGTH					( 10	),
+		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_e.txt")
 	)
 	in_gen_e (
 		.clk					( clk		),
@@ -124,12 +126,27 @@ module tb_data_route;
 		.m_tready				( in_tready_e )
 	);
 
+	// input i
+	data_gen # (
+		.WIDTH					( 1536	),
+		.LENGTH					( 10	),
+		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_i.txt")
+	)
+	in_gen_i (
+		.clk					( clk		),
+		.rst_n					( rst_n		),
+		.m_tdata				( in_tdata_i ),
+		.m_tvalid				( in_tvalid_i ),
+		.m_tlast				( ),
+		.m_tready				( in_tready_i )
+	);
 
-	reg sim_out_e_tready_reg=0;
-	reg sim_out_e_tready_reg_pad;
-	wire out_tready_e;
 
-	assign out_tready_e = sim_out_e_tready_reg_pad;
+	reg sim_out_a_tready_reg=0;
+	reg sim_out_a_tready_reg_pad;
+	wire out_tready_a;
+
+	assign out_tready_a = sim_out_a_tready_reg_pad;
 
 	integer delay1, delay2, k;
 	initial
@@ -138,13 +155,13 @@ module tb_data_route;
 				begin
 					delay1 = 10 * ( {$random} % 60 );
 					delay2 = 10 * ( {$random} % 60 );
-					# delay1 sim_out_e_tready_reg = 1;
-					# delay2 sim_out_e_tready_reg = 0;
+					# delay1 sim_out_a_tready_reg = 1;
+					# delay2 sim_out_a_tready_reg = 0;
 				end
 		end
 
 	always @(posedge clk) begin
-		sim_out_e_tready_reg_pad <= sim_out_e_tready_reg;
+		sim_out_a_tready_reg_pad <= sim_out_a_tready_reg;
 	end
 
 
@@ -152,10 +169,12 @@ module tb_data_route;
 		.clk					( clk ),
 		.rst_n					( rst_n ),
 
-		.s_droute_switch_0		( 18'h21 ),
+		.s_droute_switch_0		( 19'h100c1 ),
 		.count_switch_0_tvalid	( count_switch_0_tvalid ),
-		.s_droute_switch_1		( 18'h0 ),
+		.s_droute_switch_1		( 19'h2013a ),
 		.count_switch_1_tvalid	( count_switch_1_tvalid ),
+		.s_droute_switch_2		( 19'h10083 ),
+		.count_switch_2_tvalid	( count_switch_2_tvalid ),
 		.in_valid				( in_valid ),
 
 		.s_in_a_tdata			( in_tdata_a  ),
@@ -203,12 +222,19 @@ module tb_data_route;
 
 		.m_out_h_tdata			( out_tdata_h  ),
 		.m_out_h_tvalid			( out_tvalid_h ),
-		.m_out_h_tready			( out_tready_h )
+		.m_out_h_tready			( out_tready_h ),
+
+		.s_in_i_tdata			( in_tdata_i  ),
+		.s_in_i_tvalid			( in_tvalid_i ),
+		.s_in_i_tready			( in_tready_i ),
+		.m_out_i_tdata			( out_tdata_i ),
+		.m_out_i_tvalid			( out_tvalid_i ),
+		.m_out_i_tready			( out_tready_i )
 	);
 
 
 	integer handle0 ;
-	initial handle0=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_a_sim.txt");
+	initial handle0=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_a_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_a & out_tready_a) begin
@@ -219,7 +245,7 @@ module tb_data_route;
 
 
 	integer handle1 ;
-	initial handle1=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_b_sim.txt");
+	initial handle1=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_b_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_b & out_tready_b) begin
@@ -230,7 +256,7 @@ module tb_data_route;
 
 
 	integer handle2 ;
-	initial handle2=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_c_sim.txt");
+	initial handle2=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_c_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_c & out_tready_c) begin
@@ -241,7 +267,7 @@ module tb_data_route;
 
 
 	integer handle3 ;
-	initial handle3=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_d_sim.txt");
+	initial handle3=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_d_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_d & out_tready_d) begin
@@ -252,7 +278,7 @@ module tb_data_route;
 
 
 	integer handle4 ;
-	initial handle4=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_e_sim.txt");
+	initial handle4=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_e_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_e & out_tready_e) begin
@@ -263,7 +289,7 @@ module tb_data_route;
 
 
 	integer handle5 ;
-	initial handle5=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_f_sim.txt");
+	initial handle5=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_f_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_f & out_tready_f) begin
@@ -274,7 +300,7 @@ module tb_data_route;
 
 
 	integer handle6 ;
-	initial handle6=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_g_sim.txt");
+	initial handle6=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_g_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_g & out_tready_g) begin
@@ -285,7 +311,7 @@ module tb_data_route;
 
 
 	integer handle7 ;
-	initial handle7=$fopen("/media/raymond_2t_101/1_projects/poly_systolic_unit/py-sim/dat/data_route/out_h_sim.txt");
+	initial handle7=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_h_sim.txt");
 	always @ (posedge clk) begin
 		if (rst_n) begin
 			if (out_tvalid_h & out_tready_h) begin
@@ -295,5 +321,15 @@ module tb_data_route;
 	end
 
 
-endmodule
+	integer handle8 ;
+	initial handle8=$fopen("/media/Projects/poly_systolic_unit/py-sim/dat/data_route/out_i_sim.txt");
+	always @ (posedge clk) begin
+		if (rst_n) begin
+			if (out_tvalid_i & out_tready_i) begin
+				$fdisplay(handle8,"%h",out_tdata_i);
+			end
+		end
+	end
 
+
+endmodule
