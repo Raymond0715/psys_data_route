@@ -88,7 +88,7 @@ module data_route (
 	output										m_out_dic_b_tvalid,
 	input										m_out_dic_b_tready,
 
-	output	[1535:0]							m_out_dic_c_tdata,
+	output	[6143:0]							m_out_dic_c_tdata,
 	output										m_out_dic_c_tvalid,
 	input										m_out_dic_c_tready,
 
