@@ -25,6 +25,8 @@ module out_switch # (
 	input										clk,
 	input										rst_n,
 
+	input										weight_switch,
+
 	input	[DWIDTH-1:0]						s_axis_tdata_0,
 	input										s_axis_tvalid_0,
 	output										s_axis_tready_0,
@@ -43,13 +45,15 @@ module out_switch # (
 	output	[DWIDTH-1:0]						m_axis_tdata,
 	output										m_axis_tvalid,
 	input										m_axis_tready,
-	output										m_axis_tlast
+	output										m_axis_tlast,
+
+	output										weight_switch_out
 );
 
 
 	wire	[DWIDTH-1:0]		tdata, tdata_0, tdata_1, tdata_2;
 	wire						tready, tvalid, tlast_0, tlast_1, tlast_2, tlast;
-	wire	[DWIDTH:0]			m_out;
+	wire	[DWIDTH+1:0]		m_out;
 
 	reg							rstn_reg;
 
@@ -69,66 +73,25 @@ module out_switch # (
 	assign s_axis_tready_1 = tready;
 	assign s_axis_tready_2 = tready;
 
+	assign weight_switch_out = m_out[DWIDTH+1];
 	assign m_axis_tdata = m_out[DWIDTH:1];
 	assign m_axis_tlast = m_out[0];
 
 
 	axi_register_slice_v2_1_axic_register_slice # (
-		.C_DATA_WIDTH		( DWIDTH+1 ),
+		.C_DATA_WIDTH		( DWIDTH+2 ),
 		.C_REG_CONFIG		( 2 )
 	)
 	fwd_slice_reg_g (
 		.ACLK				( clk ),
 		.ARESET				( ~rst_n ),
-		.S_PAYLOAD_DATA		( {tdata, tlast} ),
+		.S_PAYLOAD_DATA		( {weight_switch, tdata, tlast} ),
 		.S_VALID			( tvalid ),
 		.S_READY			( tready ),
 		.M_PAYLOAD_DATA		( m_out ),
 		.M_VALID			( m_axis_tvalid ),
 		.M_READY			( m_axis_tready )
 	);
-
-
-	//always @(posedge clk) begin
-		//if (~rst_n) begin
-			//rstn_reg <= 1'b0;
-		//end
-		//else begin
-			//rstn_reg <= rst_n;
-		//end
-	//end
-
-
-	//always @(posedge clk) begin
-		//if (~rstn_reg) begin
-			//m_axis_tdata <= 0;
-		//end
-		//else begin
-			//if ((s_axis_tvalid_0 & s_axis_tready_0) |
-				//(s_axis_tvalid_1 & s_axis_tready_1)) begin
-				//m_axis_tdata <= tdata_0 | tdata_1;
-			//end
-		//end
-	//end
-
-
-	//always @(posedge clk) begin
-		//if (~rstn_reg) begin
-			//m_axis_tvalid <= 1'b0;
-		//end
-		//else begin
-			//if (s_axis_tvalid_0 | s_axis_tvalid_1) begin
-				//m_axis_tvalid <= 1'b1;
-			//end
-			//else if (m_axis_tready) begin
-				//m_axis_tvalid <= 1'b0;
-			//end
-		//end
-	//end
-
-
-	//assign s_axis_tready_0 = (m_axis_tready | ~m_axis_tvalid) & rstn_reg;
-	//assign s_axis_tready_1 = (m_axis_tready | ~m_axis_tvalid) & rstn_reg;
 
 
 endmodule

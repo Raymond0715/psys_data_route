@@ -61,6 +61,7 @@ module data_gen # (
 		end
 		else if (count==(LENGTH-1) && m_tvalid && m_tready) begin
 			valid_ctrl <=  0;
+			count <= 64'h0;
 		end
 		else if (m_tvalid && m_tready)
 			count <= count + 1;
@@ -71,7 +72,7 @@ module data_gen # (
 	integer delay1, delay2, k;
 	initial
 		begin
-			for (k = 0; k < 100; k = k+1)
+			for (k = 0; 1; k = k+1)
 				begin
 					delay1 = 5 * ( {$random} % 60 );
 					delay2 = 5 * ( {$random} % 60 );

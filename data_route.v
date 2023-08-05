@@ -37,6 +37,8 @@ module data_route (
 
 	input										dic_mode,
 
+	input										pe_array_weight_data_switch,
+
 	input	[127:0]								s_in_a_tdata,
 	input										s_in_a_tvalid,
 	output										s_in_a_tready,
@@ -62,16 +64,24 @@ module data_route (
 	input	[1535:0]							s_in_c_tdata,
 	input										s_in_c_tvalid,
 	output										s_in_c_tready,
+	input	[15:0]								s_in_c_tkeep,
+	input										s_in_c_tlast,
 	output	[1535:0]							m_out_c_tdata,
 	output										m_out_c_tvalid,
 	input										m_out_c_tready,
+	output	reg [15:0]							m_out_c_tkeep = 16'hffff,
+	output										m_out_c_tlast,
 
 	input	[1535:0]							s_in_d_tdata,
 	input										s_in_d_tvalid,
 	output										s_in_d_tready,
+	input	[15:0]								s_in_d_tkeep,
+	input										s_in_d_tlast,
 	output	[1535:0]							m_out_d_tdata,
 	output										m_out_d_tvalid,
 	input										m_out_d_tready,
+	output	reg [15:0]							m_out_d_tkeep = 16'hffff,
+	output										m_out_d_tlast,
 
 	input	[1535:0]							s_in_e_tdata,
 	input										s_in_e_tvalid,
@@ -91,10 +101,16 @@ module data_route (
 	output	[6143:0]							m_out_dic_c_tdata,
 	output										m_out_dic_c_tvalid,
 	input										m_out_dic_c_tready,
+	output	reg [15:0]							m_out_dic_c_tkeep = 16'hffff,
+	output	[3:0]								m_out_dic_c_tlast,
+	output	[3:0]								out_dic_c_weight_switch,
 
 	output	[255:0]								m_out_dic_d_tdata,
 	output										m_out_dic_d_tvalid,
 	input										m_out_dic_d_tready,
+	output	reg [15:0]							m_out_dic_d_tkeep = 16'hffff,
+	output										m_out_dic_d_tlast,
+	output										out_dic_d_weight_switch,
 
 	input	[1535:0]							s_in_i_tdata,
 	input										s_in_i_tvalid,
@@ -112,7 +128,7 @@ module data_route (
 
 	data_gen # (
 		.WIDTH					( 128	),
-		.LENGTH					( 768	),
+		.LENGTH					( 87048	),
 		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/poly_systolic/input.txt")
 	)
 	in_gen_d (
@@ -155,17 +171,30 @@ module data_route (
 	wire	out_a_tvalid_0, out_a_tready_0, out_b_tvalid_0, out_b_tready_0,
 			out_c_tvalid_0, out_c_tready_0, out_d_tvalid_0, out_d_tready_0,
 			out_e_tvalid_0, out_e_tready_0, out_f_tvalid_0, out_f_tready_0,
-			out_g_tvalid_0, out_g_tready_0, out_h_tvalid_0, out_h_tready_0;
+			out_g_tvalid_0, out_g_tready_0, out_h_tvalid_0, out_h_tready_0,
+			out_i_tvalid_0, out_i_tready_0;
 
 	wire 	out_a_tvalid_1, out_a_tready_1, out_b_tvalid_1, out_b_tready_1,
 			out_c_tvalid_1, out_c_tready_1, out_d_tvalid_1, out_d_tready_1,
 			out_e_tvalid_1, out_e_tready_1, out_f_tvalid_1, out_f_tready_1,
-			out_g_tvalid_1, out_g_tready_1, out_h_tvalid_1, out_h_tready_1;
+			out_g_tvalid_1, out_g_tready_1, out_h_tvalid_1, out_h_tready_1,
+			out_i_tvalid_1, out_i_tready_1;
 
-	wire 	out_a_tvalid_2, out_a_tready_2, out_b_tvalid_2, out_b_tready_2,
+	wire	out_a_tvalid_2, out_a_tready_2, out_b_tvalid_2, out_b_tready_2,
 			out_c_tvalid_2, out_c_tready_2, out_d_tvalid_2, out_d_tready_2,
 			out_e_tvalid_2, out_e_tready_2, out_f_tvalid_2, out_f_tready_2,
-			out_g_tvalid_2, out_g_tready_2, out_h_tvalid_2, out_h_tready_2;
+			out_g_tvalid_2, out_g_tready_2, out_h_tvalid_2, out_h_tready_2,
+			out_i_tvalid_2, out_i_tready_2;
+
+	wire	out_a_tlast_0, out_a_tlast_1, out_a_tlast_2,
+			in_f_tlast, out_f_tlast_0, out_f_tlast_1, out_f_tlast_2,
+			in_g_tlast, out_g_tlast_0, out_g_tlast_1, out_g_tlast_2,
+			in_h_tlast, out_h_tlast_0, out_h_tlast_1, out_h_tlast_2;
+
+	wire	out_weight_switch, out_weight_switch_0,
+			out_weight_switch_1, out_weight_switch_2;
+
+	wire	in_h_weight_switch, in_f_weight_switch;
 
 
 	//assign in_valid = {in_a_tvalid, in_b_tvalid, s_in_c_tvalid,
@@ -219,6 +248,7 @@ module data_route (
 		.rst_n					( rst_n ),
 		.ctrl					( s_droute_switch_0 ),
 		.count_switch_tvalid	( count_switch_0_tvalid ),
+		.weight_switch			( pe_array_weight_data_switch ),
 
 		.s_in_a_tdata			( in_a_tdata  ),
 		.s_in_a_tvalid			( in_a_tvalid ),
@@ -231,9 +261,11 @@ module data_route (
 		.s_in_c_tdata			( s_in_c_tdata  ),
 		.s_in_c_tvalid			( s_in_c_tvalid ),
 		.s_in_c_tready			( s_in_c_tready_0 ),
+		.s_in_c_tlast			( s_in_c_tlast ),
 		.s_in_d_tdata			( s_in_d_tdata  ),
 		.s_in_d_tvalid			( s_in_d_tvalid ),
 		.s_in_d_tready			( s_in_d_tready_0 ),
+		.s_in_d_tlast			( s_in_d_tlast ),
 		.s_in_e_tdata			( s_in_e_tdata  ),
 		.s_in_e_tvalid			( s_in_e_tvalid ),
 		.s_in_e_tready			( s_in_e_tready_0 ),
@@ -258,12 +290,16 @@ module data_route (
 		.m_out_e_tready			( out_e_tready_0 ),
 		.m_out_f_tvalid			( out_f_tvalid_0 ),
 		.m_out_f_tready			( out_f_tready_0 ),
+		.m_out_f_tlast			( out_f_tlast_0 ),
 		.m_out_g_tvalid			( out_g_tvalid_0 ),
 		.m_out_g_tready			( out_g_tready_0 ),
+		.m_out_g_tlast			( out_g_tlast_0 ),
 		.m_out_h_tvalid			( out_h_tvalid_0 ),
 		.m_out_h_tready			( out_h_tready_0 ),
+		.m_out_h_tlast			( out_h_tlast_0 ),
 		.m_out_i_tvalid			( out_i_tvalid_0 ),
-		.m_out_i_tready			( out_i_tready_0 )
+		.m_out_i_tready			( out_i_tready_0 ),
+		.m_inter_weight_switch	( out_weight_switch_0 )
 	);
 
 
@@ -272,6 +308,7 @@ module data_route (
 		.rst_n					( rst_n ),
 		.ctrl					( s_droute_switch_1 ),
 		.count_switch_tvalid	( count_switch_1_tvalid ),
+		.weight_switch			( pe_array_weight_data_switch ),
 
 		.s_in_a_tdata			( in_a_tdata  ),
 		.s_in_a_tvalid			( in_a_tvalid ),
@@ -284,9 +321,11 @@ module data_route (
 		.s_in_c_tdata			( s_in_c_tdata  ),
 		.s_in_c_tvalid			( s_in_c_tvalid ),
 		.s_in_c_tready			( s_in_c_tready_1 ),
+		.s_in_c_tlast			( s_in_c_tlast ),
 		.s_in_d_tdata			( s_in_d_tdata  ),
 		.s_in_d_tvalid			( s_in_d_tvalid ),
 		.s_in_d_tready			( s_in_d_tready_1 ),
+		.s_in_d_tlast			( s_in_d_tlast ),
 		.s_in_e_tdata			( s_in_e_tdata  ),
 		.s_in_e_tvalid			( s_in_e_tvalid ),
 		.s_in_e_tready			( s_in_e_tready_1 ),
@@ -311,12 +350,16 @@ module data_route (
 		.m_out_e_tready			( out_e_tready_1 ),
 		.m_out_f_tvalid			( out_f_tvalid_1 ),
 		.m_out_f_tready			( out_f_tready_1 ),
+		.m_out_f_tlast			( out_f_tlast_1 ),
 		.m_out_g_tvalid			( out_g_tvalid_1 ),
 		.m_out_g_tready			( out_g_tready_1 ),
+		.m_out_g_tlast			( out_g_tlast_1 ),
 		.m_out_h_tvalid			( out_h_tvalid_1 ),
 		.m_out_h_tready			( out_h_tready_1 ),
+		.m_out_h_tlast			( out_h_tlast_1 ),
 		.m_out_i_tvalid			( out_i_tvalid_1 ),
-		.m_out_i_tready			( out_i_tready_1 )
+		.m_out_i_tready			( out_i_tready_1 ),
+		.m_inter_weight_switch	( out_weight_switch_1 )
 	);
 
 
@@ -325,6 +368,7 @@ module data_route (
 		.rst_n					( rst_n ),
 		.ctrl					( s_droute_switch_2 ),
 		.count_switch_tvalid	( count_switch_2_tvalid ),
+		.weight_switch			( pe_array_weight_data_switch ),
 
 		.s_in_a_tdata			( in_a_tdata  ),
 		.s_in_a_tvalid			( in_a_tvalid ),
@@ -337,9 +381,11 @@ module data_route (
 		.s_in_c_tdata			( s_in_c_tdata  ),
 		.s_in_c_tvalid			( s_in_c_tvalid ),
 		.s_in_c_tready			( s_in_c_tready_2 ),
+		.s_in_c_tlast			( s_in_c_tlast ),
 		.s_in_d_tdata			( s_in_d_tdata  ),
 		.s_in_d_tvalid			( s_in_d_tvalid ),
 		.s_in_d_tready			( s_in_d_tready_2 ),
+		.s_in_d_tlast			( s_in_d_tlast ),
 		.s_in_e_tdata			( s_in_e_tdata  ),
 		.s_in_e_tvalid			( s_in_e_tvalid ),
 		.s_in_e_tready			( s_in_e_tready_2 ),
@@ -364,12 +410,16 @@ module data_route (
 		.m_out_e_tready			( out_e_tready_2 ),
 		.m_out_f_tvalid			( out_f_tvalid_2 ),
 		.m_out_f_tready			( out_f_tready_2 ),
+		.m_out_f_tlast			( out_f_tlast_2 ),
 		.m_out_g_tvalid			( out_g_tvalid_2 ),
 		.m_out_g_tready			( out_g_tready_2 ),
+		.m_out_g_tlast			( out_g_tlast_2 ),
 		.m_out_h_tvalid			( out_h_tvalid_2 ),
 		.m_out_h_tready			( out_h_tready_2 ),
+		.m_out_h_tlast			( out_h_tlast_2 ),
 		.m_out_i_tvalid			( out_i_tvalid_2 ),
-		.m_out_i_tready			( out_i_tready_2 )
+		.m_out_i_tready			( out_i_tready_2 ),
+		.m_inter_weight_switch	( out_weight_switch_2 )
 	);
 
 
@@ -394,7 +444,7 @@ module data_route (
 		.m_axis_tdata			( m_out_a_tdata ),
 		.m_axis_tvalid			( m_out_a_tvalid ),
 `ifdef SIM_BD
-		.m_axis_tready			( 1 ),
+		.m_axis_tready			( 1'b1 ),
 `else
 		.m_axis_tready			( m_out_a_tready ),
 `endif
@@ -489,57 +539,77 @@ module data_route (
 	);
 
 
+	assign out_weight_switch =
+		out_weight_switch_0 | out_weight_switch_1 | out_weight_switch_2;
+
+
 	out_switch # (
 		.DWIDTH (1536)
 	)
 	out_switch_f (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
+		.weight_switch			( out_weight_switch ),
 		.s_axis_tdata_0			( switch_out_0 ),
 		.s_axis_tvalid_0		( out_f_tvalid_0 ),
 		.s_axis_tready_0		( out_f_tready_0 ),
+		.s_axis_tlast_0			( out_f_tlast_0 ),
 		.s_axis_tdata_1			( switch_out_1 ),
 		.s_axis_tvalid_1		( out_f_tvalid_1 ),
 		.s_axis_tready_1		( out_f_tready_1 ),
+		.s_axis_tlast_1			( out_f_tlast_1 ),
 		.s_axis_tdata_2			( switch_out_2 ),
 		.s_axis_tvalid_2		( out_f_tvalid_2 ),
 		.s_axis_tready_2		( out_f_tready_2 ),
+		.s_axis_tlast_2			( out_f_tlast_2 ),
 		.m_axis_tdata			( in_f_tdata ),
 		.m_axis_tvalid			( in_f_tvalid ),
-		.m_axis_tready			( in_f_tready )
+		.m_axis_tready			( in_f_tready ),
+		.m_axis_tlast			( in_f_tlast ),
+		.weight_switch_out		( in_f_weight_switch )
 	);
 
 
 	out_switch_flex out_switch_g_h (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
+		.weight_switch			( out_weight_switch ),
 		.s_axis_tdata_0			( switch_out_0 ),
 		.s_axis_tvalid_0		( out_g_tvalid_0 ),
 		.s_axis_tready_0		( out_g_tready_0 ),
+		.s_axis_tlast_0			( out_g_tlast_0 ),
 		.s_axis_256_tdata_0		( switch_out_0_256 ),
 		.s_axis_256_tvalid_0	( out_h_tvalid_0 ),
 		.s_axis_256_tready_0	( out_h_tready_0 ),
+		.s_axis_256_tlast_0		( out_h_tlast_0 ),
 
 		.s_axis_tdata_1			( switch_out_1 ),
 		.s_axis_tvalid_1		( out_g_tvalid_1 ),
 		.s_axis_tready_1		( out_g_tready_1 ),
+		.s_axis_tlast_1			( out_g_tlast_1 ),
 		.s_axis_256_tdata_1		( switch_out_1_256 ),
 		.s_axis_256_tvalid_1	( out_h_tvalid_1 ),
 		.s_axis_256_tready_1	( out_h_tready_1 ),
+		.s_axis_256_tlast_1		( out_h_tlast_1 ),
 
 		.s_axis_tdata_2			( switch_out_2 ),
 		.s_axis_tvalid_2		( out_g_tvalid_2 ),
 		.s_axis_tready_2		( out_g_tready_2 ),
+		.s_axis_tlast_2			( out_g_tlast_2 ),
 		.s_axis_256_tdata_2		( switch_out_2_256 ),
 		.s_axis_256_tvalid_2	( out_h_tvalid_2 ),
 		.s_axis_256_tready_2	( out_h_tready_2 ),
+		.s_axis_256_tlast_2		( out_h_tlast_2 ),
 
 		.m_axis_g_tdata			( in_g_tdata ),
 		.m_axis_g_tvalid		( in_g_tvalid ),
 		.m_axis_g_tready		( in_g_tready ),
+		.m_axis_g_tlast			( in_g_tlast ),
 		.m_axis_h_tdata			( in_h_tdata ),
 		.m_axis_h_tvalid		( in_h_tvalid ),
-		.m_axis_h_tready		( in_h_tready )
+		.m_axis_h_tready		( in_h_tready ),
+		.m_axis_h_tlast			( in_h_tlast ),
+		.weight_switch_h		( in_h_weight_switch )
 	);
 
 
@@ -564,17 +634,24 @@ module data_route (
 	);
 
 	data_interconnect_0 data_interconnect_0_inst (
+		.clk					( clk ),
+		.rst_n					( rst_n ),
 		.mode					( dic_mode ),
 
 		.s_in_f_tdata			( in_f_tdata  ),
 		.s_in_f_tvalid			( in_f_tvalid ),
 		.s_in_f_tready			( in_f_tready ),
+		.s_in_f_tlast			( in_f_tlast ),
+		.f_weight_switch		( in_f_weight_switch ),
 		.s_in_g_tdata			( in_g_tdata  ),
 		.s_in_g_tvalid			( in_g_tvalid ),
 		.s_in_g_tready			( in_g_tready ),
+		.s_in_g_tlast			( in_g_tlast ),
 		.s_in_h_tdata			( in_h_tdata  ),
 		.s_in_h_tvalid			( in_h_tvalid ),
 		.s_in_h_tready			( in_h_tready ),
+		.s_in_h_tlast			( in_h_tlast ),
+		.h_weight_switch		( in_h_weight_switch ),
 
 		.m_out_dic_a_tdata		( m_out_dic_a_tdata  ),
 		.m_out_dic_a_tvalid		( m_out_dic_a_tvalid ),
@@ -585,9 +662,13 @@ module data_route (
 		.m_out_dic_c_tdata		( m_out_dic_c_tdata  ),
 		.m_out_dic_c_tvalid		( m_out_dic_c_tvalid ),
 		.m_out_dic_c_tready		( m_out_dic_c_tready ),
+		.m_out_dic_c_tlast		( m_out_dic_c_tlast ),
+		.out_dic_c_weight_switch	( out_dic_c_weight_switch ),
 		.m_out_dic_d_tdata		( m_out_dic_d_tdata  ),
 		.m_out_dic_d_tvalid		( m_out_dic_d_tvalid ),
-		.m_out_dic_d_tready		( m_out_dic_d_tready )
+		.m_out_dic_d_tready		( m_out_dic_d_tready ),
+		.m_out_dic_d_tlast		( m_out_dic_d_tlast ),
+		.out_dic_d_weight_switch	( out_dic_d_weight_switch )
 	);
 
 
