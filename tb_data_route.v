@@ -30,6 +30,7 @@ module tb_data_route;
 
 	wire		in_tvalid_a, in_tvalid_b, in_tvalid_c, in_tvalid_d, in_tvalid_e;
 	wire		in_tready_a, in_tready_b, in_tready_c, in_tready_d, in_tready_e;
+	wire		in_tlast_a, in_tlast_b, in_tlast_c, in_tlast_d; 
 	wire		count_switch_0_tvalid, count_switch_1_tvalid, count_switch_2_tvalid;
 
 	wire	[1535:0]		out_tdata_c, out_tdata_d, out_tdata_e, out_tdata_f, out_tdata_i;
@@ -50,11 +51,24 @@ module tb_data_route;
 	reg			out_tready_h = 1;
 	reg			out_tready_i = 1;
 
+	wire		out_tlast_a, out_tlast_b, out_tlast_c, out_tlast_d; 
+
+	wire	[6143:0]		out_dic_c_tdata;
+	wire	[1535:0]		out_dic_a_tdata, out_dic_b_tdata;
+	wire	[255:0]			out_dic_d_tdata;
+
+	wire					out_dic_a_tvalid, out_dic_b_tvalid,
+							out_dic_c_tvalid, out_dic_d_tvalid;
+	wire					out_dic_a_tready, out_dic_b_tready,
+							out_dic_c_tready, out_dic_d_tready;
+	wire	[3:0]			out_dic_c_tlast;
+	wire					out_dic_d_tlast;
+
 
 	// input a
 	data_gen # (
 		.WIDTH					( 128	),
-		.LENGTH					( 120	),
+		.LENGTH					( 64	),
 		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_a.txt")
 	)
 	in_gen_a (
@@ -62,14 +76,14 @@ module tb_data_route;
 		.rst_n					( rst_n		),
 		.m_tdata				( in_tdata_a ),
 		.m_tvalid				( in_tvalid_a ),
-		.m_tlast				( ),
+		.m_tlast				( in_tlast_a ),
 		.m_tready				( in_tready_a )
 	);
 
 	// input b
 	data_gen # (
 		.WIDTH					( 128	),
-		.LENGTH					( 768	),
+		.LENGTH					( 640	),
 		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_b.txt")
 	)
 	in_gen_b (
@@ -77,7 +91,7 @@ module tb_data_route;
 		.rst_n					( rst_n		),
 		.m_tdata				( in_tdata_b ),
 		.m_tvalid				( in_tvalid_b	),
-		.m_tlast				( ),
+		.m_tlast				( in_tlast_b ),
 		.m_tready				( in_tready_b )
 	);
 
@@ -92,7 +106,7 @@ module tb_data_route;
 		.rst_n					( rst_n		),
 		.m_tdata				( in_tdata_c ),
 		.m_tvalid				( in_tvalid_c ),
-		.m_tlast				( ),
+		.m_tlast				( in_tlast_c ),
 		.m_tready				( in_tready_c )
 	);
 
@@ -107,7 +121,7 @@ module tb_data_route;
 		.rst_n					( rst_n		),
 		.m_tdata				( in_tdata_d ),
 		.m_tvalid				( in_tvalid_d ),
-		.m_tlast				( ),
+		.m_tlast				( in_tlast_d ),
 		.m_tready				( in_tready_d )
 	);
 
@@ -169,41 +183,55 @@ module tb_data_route;
 		.clk					( clk ),
 		.rst_n					( rst_n ),
 
-		.s_droute_switch_0		( 19'h100c1 ),
+		.s_droute_switch_0		( 19'h10091 ),
 		.count_switch_0_tvalid	( count_switch_0_tvalid ),
-		.s_droute_switch_1		( 19'h2013a ),
+		.s_droute_switch_1		( 19'h1008a ),
 		.count_switch_1_tvalid	( count_switch_1_tvalid ),
 		.s_droute_switch_2		( 19'h10083 ),
 		.count_switch_2_tvalid	( count_switch_2_tvalid ),
 		.in_valid				( in_valid ),
 
+		.dic_mode				( 1'b1 ),
+
 		.s_in_a_tdata			( in_tdata_a  ),
 		.s_in_a_tvalid			( in_tvalid_a ),
 		.s_in_a_tready			( in_tready_a ),
+		.s_in_a_tkeep			( 16'hffff ),
+		.s_in_a_tlast			( in_tlast_a ),
 		.m_out_a_tdata			( out_tdata_a ),
 		.m_out_a_tvalid			( out_tvalid_a ),
 		.m_out_a_tready			( out_tready_a ),
+		.m_out_a_tlast			( out_tlast_a ),
 
 		.s_in_b_tdata			( in_tdata_b  ),
 		.s_in_b_tvalid			( in_tvalid_b ),
 		.s_in_b_tready			( in_tready_b ),
+		.s_in_b_tkeep			( 16'hffff ),
+		.s_in_b_tlast			( in_tlast_b ),
 		.m_out_b_tdata			( out_tdata_b ),
 		.m_out_b_tvalid			( out_tvalid_b ),
 		.m_out_b_tready			( out_tready_b ),
+		.m_out_b_tlast			( out_tlast_b ),
 
 		.s_in_c_tdata			( in_tdata_c  ),
 		.s_in_c_tvalid			( in_tvalid_c ),
 		.s_in_c_tready			( in_tready_c ),
+		.s_in_c_tkeep			( 16'hffff ),
+		.s_in_c_tlast			( in_tlast_c),
 		.m_out_c_tdata			( out_tdata_c ),
 		.m_out_c_tvalid			( out_tvalid_c ),
 		.m_out_c_tready			( out_tready_c ),
+		.m_out_c_tlast			( out_tlast_c),
 
 		.s_in_d_tdata			( in_tdata_d  ),
 		.s_in_d_tvalid			( in_tvalid_d ),
 		.s_in_d_tready			( in_tready_d ),
+		.s_in_d_tkeep			( 16'hffff ),
+		.s_in_d_tlast			( in_tlast_d),
 		.m_out_d_tdata			( out_tdata_d ),
 		.m_out_d_tvalid			( out_tvalid_d ),
 		.m_out_d_tready			( out_tready_d ),
+		.m_out_d_tlast			( out_tlast_d ),
 
 		.s_in_e_tdata			( in_tdata_e  ),
 		.s_in_e_tvalid			( in_tvalid_e ),
@@ -212,17 +240,23 @@ module tb_data_route;
 		.m_out_e_tvalid			( out_tvalid_e ),
 		.m_out_e_tready			( out_tready_e ),
 
-		.m_out_f_tdata			( out_tdata_f  ),
-		.m_out_f_tvalid			( out_tvalid_f ),
-		.m_out_f_tready			( out_tready_f ),
+		.m_out_dic_a_tdata		( out_dic_a_tdata ),
+		.m_out_dic_a_tvalid		( out_dic_a_tvalid ),
+		.m_out_dic_a_tready		( out_dic_a_tready ),
 
-		.m_out_g_tdata			( out_tdata_g  ),
-		.m_out_g_tvalid			( out_tvalid_g ),
-		.m_out_g_tready			( out_tready_g ),
+		.m_out_dic_b_tdata		( out_dic_b_tdata ),
+		.m_out_dic_b_tvalid		( out_dic_b_tvalid ),
+		.m_out_dic_b_tready		( out_dic_b_tready ),
 
-		.m_out_h_tdata			( out_tdata_h  ),
-		.m_out_h_tvalid			( out_tvalid_h ),
-		.m_out_h_tready			( out_tready_h ),
+		.m_out_dic_c_tdata		( out_dic_c_tdata ),
+		.m_out_dic_c_tvalid		( out_dic_c_tvalid ),
+		.m_out_dic_c_tready		( out_dic_c_tready ),
+		.m_out_dic_c_tlast		( out_dic_c_tlast ),
+
+		.m_out_dic_d_tdata		( out_dic_d_tdata ),
+		.m_out_dic_d_tvalid		( out_dic_d_tvalid ),
+		.m_out_dic_d_tready		( out_dic_d_tready ),
+		.m_out_dic_d_tlast		( out_dic_d_tlast ),
 
 		.s_in_i_tdata			( in_tdata_i  ),
 		.s_in_i_tvalid			( in_tvalid_i ),

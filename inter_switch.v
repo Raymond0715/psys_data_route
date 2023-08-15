@@ -69,6 +69,7 @@ module inter_switch (
 
 	output										m_out_b_tvalid,
 	input										m_out_b_tready,
+	output										m_out_b_tlast,
 
 	output										m_out_c_tvalid,
 	input										m_out_c_tready,
@@ -116,7 +117,7 @@ module inter_switch (
 
 	wire	[1548:0]		m_inter_tdata_bus;
 	wire	[1535:0]		m_inter_tdata;
-	wire	[11:0]			m_inter_tlast, m_inter_tlast_a;
+	wire	[11:0]			m_inter_tlast, m_inter_tlast_a, m_inter_tlast_b;
 	wire					m_inter_tvalid, m_inter_tready;
 
 
@@ -168,6 +169,7 @@ module inter_switch (
 	assign m_inter_tlast = m_inter_tdata_bus[1547:1536];
 	assign m_inter_weight_switch = m_inter_tdata_bus[1548];
 	assign m_inter_tlast_a = switch_out_en[0] ? m_inter_tlast : 12'h0;
+	assign m_inter_tlast_b = switch_out_en[1] ? m_inter_tlast : 12'h0;
 	assign m_out_f_tlast = switch_out_en[5] ? m_inter_tlast : 1'b0;
 	assign m_out_g_tlast = switch_out_en[6] ? m_inter_tlast : 1'b0;
 	assign m_out_h_tlast = switch_out_en[7] ? m_inter_tlast : 1'b0;
@@ -292,9 +294,11 @@ module inter_switch (
 		.s_axis_tdata		( m_inter_tdata ),
 		.s_axis_tvalid		( m_inter_tvalid & switch_out_en[1] ),
 		.s_axis_tready		( inter_128_tready_b ),
+		.s_axis_tlast		( m_inter_tlast_b ),
 		.m_axis_tdata		( out_inter_128_tdata_b ),
 		.m_axis_tvalid		( out_inter_128_tvalid_b ),
-		.m_axis_tready		( m_out_b_tready )
+		.m_axis_tready		( m_out_b_tready ),
+		.m_axis_tlast		( m_out_b_tlast )
 	);
 
 
