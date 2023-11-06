@@ -65,23 +65,23 @@ module data_route (
 	input										s_in_c_tvalid,
 	output										s_in_c_tready,
 	input	[15:0]								s_in_c_tkeep,
-	input										s_in_c_tlast,
+	input	[23:0]								s_in_c_tlast,
 	output	[1535:0]							m_out_c_tdata,
 	output										m_out_c_tvalid,
 	input										m_out_c_tready,
 	output	reg [15:0]							m_out_c_tkeep = 16'hffff,
-	output										m_out_c_tlast,
+	output	[11:0]								m_out_c_tlast,
 
 	input	[1535:0]							s_in_d_tdata,
 	input										s_in_d_tvalid,
 	output										s_in_d_tready,
 	input	[15:0]								s_in_d_tkeep,
-	input										s_in_d_tlast,
+	input	[23:0]								s_in_d_tlast,
 	output	[1535:0]							m_out_d_tdata,
 	output										m_out_d_tvalid,
 	input										m_out_d_tready,
 	output	reg [15:0]							m_out_d_tkeep = 16'hffff,
-	output										m_out_d_tlast,
+	output	[11:0]								m_out_d_tlast,
 
 	input	[1535:0]							s_in_e_tdata,
 	input										s_in_e_tvalid,
@@ -129,7 +129,9 @@ module data_route (
 	data_gen # (
 		.WIDTH					( 128	),
 		.LENGTH					( 87048	),
-		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/poly_systolic/input.txt")
+		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/conv_256_56/input.txt"),
+		.RAND					( 0 ),
+		.RAND_CYC				( 1 )
 	)
 	in_gen_d (
 		.clk					( clk ),
@@ -186,10 +188,13 @@ module data_route (
 			out_g_tvalid_2, out_g_tready_2, out_h_tvalid_2, out_h_tready_2,
 			out_i_tvalid_2, out_i_tready_2;
 
-	wire	out_a_tlast_0, out_a_tlast_1, out_a_tlast_2,
-			in_f_tlast, out_f_tlast_0, out_f_tlast_1, out_f_tlast_2,
-			in_g_tlast, out_g_tlast_0, out_g_tlast_1, out_g_tlast_2,
-			in_h_tlast, out_h_tlast_0, out_h_tlast_1, out_h_tlast_2;
+	wire	out_f_tlast_0, out_f_tlast_1, out_f_tlast_2,
+			out_g_tlast_0, out_g_tlast_1, out_g_tlast_2,
+			out_h_tlast_0, out_h_tlast_1, out_h_tlast_2;
+	wire	[11:0]		out_c_tlast_0, out_c_tlast_1, out_c_tlast_2,
+						out_d_tlast_0, out_d_tlast_1, out_d_tlast_2;
+	wire	in_f_tlast, in_g_tlast, in_h_tlast;
+	wire	out_a_tlast_0, out_a_tlast_1, out_a_tlast_2;
 
 	wire	out_weight_switch, out_weight_switch_0,
 			out_weight_switch_1, out_weight_switch_2;
@@ -197,10 +202,11 @@ module data_route (
 	wire	in_h_weight_switch, in_f_weight_switch;
 
 
-	//assign in_valid = {in_a_tvalid, in_b_tvalid, s_in_c_tvalid,
-		//s_in_d_tvalid, s_in_e_tvalid};
-	assign in_valid = {s_in_e_tvalid, s_in_d_tvalid, s_in_c_tvalid, in_b_tvalid,
-		in_a_tvalid};
+	assign in_valid = {s_in_e_tvalid, s_in_d_tvalid, s_in_c_tvalid,
+		in_b_tvalid, in_a_tvalid};
+	//assign in_valid = {s_in_e_tvalid & s_in_e_tready,
+		//s_in_d_tvalid & s_in_d_tready, s_in_c_tvalid & s_in_c_tready,
+		//in_b_tvalid, in_a_tvalid};
 
 	assign s_in_c_tready = s_in_c_tready_0 | s_in_c_tready_1 | s_in_c_tready_2;
 	assign s_in_d_tready = s_in_d_tready_0 | s_in_d_tready_1 | s_in_d_tready_2;
@@ -284,8 +290,10 @@ module data_route (
 		.m_out_b_tready			( out_b_tready_0 ),
 		.m_out_c_tvalid			( out_c_tvalid_0 ),
 		.m_out_c_tready			( out_c_tready_0 ),
+		.m_out_c_tlast			( out_c_tlast_0 ),
 		.m_out_d_tvalid			( out_d_tvalid_0 ),
 		.m_out_d_tready			( out_d_tready_0 ),
+		.m_out_d_tlast			( out_d_tlast_0 ),
 		.m_out_e_tvalid			( out_e_tvalid_0 ),
 		.m_out_e_tready			( out_e_tready_0 ),
 		.m_out_f_tvalid			( out_f_tvalid_0 ),
@@ -344,8 +352,10 @@ module data_route (
 		.m_out_b_tready			( out_b_tready_1 ),
 		.m_out_c_tvalid			( out_c_tvalid_1 ),
 		.m_out_c_tready			( out_c_tready_1 ),
+		.m_out_c_tlast			( out_c_tlast_1 ),
 		.m_out_d_tvalid			( out_d_tvalid_1 ),
 		.m_out_d_tready			( out_d_tready_1 ),
+		.m_out_d_tlast			( out_d_tlast_1 ),
 		.m_out_e_tvalid			( out_e_tvalid_1 ),
 		.m_out_e_tready			( out_e_tready_1 ),
 		.m_out_f_tvalid			( out_f_tvalid_1 ),
@@ -404,8 +414,10 @@ module data_route (
 		.m_out_b_tready			( out_b_tready_2 ),
 		.m_out_c_tvalid			( out_c_tvalid_2 ),
 		.m_out_c_tready			( out_c_tready_2 ),
+		.m_out_c_tlast			( out_c_tlast_2 ),
 		.m_out_d_tvalid			( out_d_tvalid_2 ),
 		.m_out_d_tready			( out_d_tready_2 ),
+		.m_out_d_tlast			( out_d_tlast_2 ),
 		.m_out_e_tvalid			( out_e_tvalid_2 ),
 		.m_out_e_tready			( out_e_tready_2 ),
 		.m_out_f_tvalid			( out_f_tvalid_2 ),
@@ -425,6 +437,7 @@ module data_route (
 
 	out_switch # (
 		.DWIDTH (128)
+		,.LASTW  (1)
 	)
 	out_switch_a (
 		.clk					( clk ),
@@ -454,6 +467,7 @@ module data_route (
 
 	out_switch # (
 		.DWIDTH (128)
+		,.LASTW  (1)
 	)
 	out_switch_b (
 		.clk					( clk ),
@@ -478,6 +492,7 @@ module data_route (
 
 	out_switch # (
 		.DWIDTH (1536)
+		,.LASTW  (12)
 	)
 	out_switch_c (
 		.clk					( clk ),
@@ -485,20 +500,25 @@ module data_route (
 		.s_axis_tdata_0			( switch_out_0 ),
 		.s_axis_tvalid_0		( out_c_tvalid_0 ),
 		.s_axis_tready_0		( out_c_tready_0 ),
+		.s_axis_tlast_0			( out_c_tlast_0 ),
 		.s_axis_tdata_1			( switch_out_1 ),
 		.s_axis_tvalid_1		( out_c_tvalid_1 ),
 		.s_axis_tready_1		( out_c_tready_1 ),
+		.s_axis_tlast_1			( out_c_tlast_1 ),
 		.s_axis_tdata_2			( switch_out_2 ),
 		.s_axis_tvalid_2		( out_c_tvalid_2 ),
 		.s_axis_tready_2		( out_c_tready_2 ),
+		.s_axis_tlast_2			( out_c_tlast_2 ),
 		.m_axis_tdata			( m_out_c_tdata ),
 		.m_axis_tvalid			( m_out_c_tvalid ),
-		.m_axis_tready			( m_out_c_tready )
+		.m_axis_tready			( m_out_c_tready ),
+		.m_axis_tlast			( m_out_c_tlast )
 	);
 
 
 	out_switch # (
 		.DWIDTH (1536)
+		,.LASTW  (12)
 	)
 	out_switch_d (
 		.clk					( clk ),
@@ -506,15 +526,19 @@ module data_route (
 		.s_axis_tdata_0			( switch_out_0 ),
 		.s_axis_tvalid_0		( out_d_tvalid_0 ),
 		.s_axis_tready_0		( out_d_tready_0 ),
+		.s_axis_tlast_0			( out_d_tlast_0 ),
 		.s_axis_tdata_1			( switch_out_1 ),
 		.s_axis_tvalid_1		( out_d_tvalid_1 ),
 		.s_axis_tready_1		( out_d_tready_1 ),
+		.s_axis_tlast_1			( out_d_tlast_1 ),
 		.s_axis_tdata_2			( switch_out_2 ),
 		.s_axis_tvalid_2		( out_d_tvalid_2 ),
 		.s_axis_tready_2		( out_d_tready_2 ),
+		.s_axis_tlast_2			( out_d_tlast_2 ),
 		.m_axis_tdata			( m_out_d_tdata ),
 		.m_axis_tvalid			( m_out_d_tvalid ),
-		.m_axis_tready			( m_out_d_tready )
+		.m_axis_tready			( m_out_d_tready ),
+		.m_axis_tlast			( m_out_d_tlast )
 	);
 
 
@@ -545,6 +569,7 @@ module data_route (
 
 	out_switch # (
 		.DWIDTH (1536)
+		,.LASTW  (1)
 	)
 	out_switch_f (
 		.clk					( clk ),

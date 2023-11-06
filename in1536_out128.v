@@ -39,25 +39,28 @@ module in1536_out128 (
 	reg		[11:0]			tlast_reg;
 	reg		[10:0]			count;
 
-	reg						in_last_reg, m_ready_reg;
-	wire					in_last, m_ready;
+	reg						m_ready_reg;
+	wire					m_ready;
+
+	//reg						in_last_reg;
+	//wire					in_last;
 
 
-	always @(posedge clk) begin
-		if (~rst_n) begin
-			in_last_reg <= 1'b0;
-		end
-		else begin
-			if (in_last & ~m_axis_tready) begin
-				in_last_reg <= 1'b1;
-			end
-			else begin
-				in_last_reg <= 1'b0;
-			end
-		end
-	end
+	//always @(posedge clk) begin
+		//if (~rst_n) begin
+			//in_last_reg <= 1'b0;
+		//end
+		//else begin
+			//if (in_last & ~m_axis_tready) begin
+				//in_last_reg <= 1'b1;
+			//end
+			//else begin
+				//in_last_reg <= 1'b0;
+			//end
+		//end
+	//end
 
-	assign in_last = in_last_reg | s_axis_tlast;
+	//assign in_last = in_last_reg | (|s_axis_tlast);
 
 
 	always @(posedge clk) begin
@@ -149,7 +152,7 @@ module in1536_out128 (
 			tlast_reg <= 12'd0;
 		end
 		else begin
-			if (in_last) begin
+			if (m_axis_tlast) begin
 				if (m_ready & s_axis_tvalid) begin
 					in_reg <= s_axis_tdata;
 					tlast_reg <= s_axis_tlast;
@@ -159,7 +162,7 @@ module in1536_out128 (
 				in_reg <= in_reg >> 8'd128;
 				tlast_reg <= tlast_reg >> 1'd1;
 			end
-			else if ((count == 8'd128) && m_axis_tready && s_axis_tvalid) begin
+			else if (count == 8'd128 && m_axis_tready && s_axis_tvalid) begin
 				in_reg <= s_axis_tdata;
 				tlast_reg <= s_axis_tlast;
 			end

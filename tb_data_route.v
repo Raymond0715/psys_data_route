@@ -51,7 +51,8 @@ module tb_data_route;
 	reg			out_tready_h = 1;
 	reg			out_tready_i = 1;
 
-	wire		out_tlast_a, out_tlast_b, out_tlast_c, out_tlast_d; 
+	wire	[11:0]		out_tlast_c, out_tlast_d;
+	wire				out_tlast_a, out_tlast_b; 
 
 	wire	[6143:0]		out_dic_c_tdata;
 	wire	[1535:0]		out_dic_a_tdata, out_dic_b_tdata;
@@ -67,9 +68,11 @@ module tb_data_route;
 
 	// input a
 	data_gen # (
-		.WIDTH					( 128	),
-		.LENGTH					( 64	),
-		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_a.txt")
+		 .WIDTH					( 128	)
+		,.LENGTH				( 64	)
+		,.DPATH 				( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_a.txt")
+		,.RAND					( 0 )
+		,.RAND_CYC				( 8 )
 	)
 	in_gen_a (
 		.clk					( clk		),
@@ -82,9 +85,11 @@ module tb_data_route;
 
 	// input b
 	data_gen # (
-		.WIDTH					( 128	),
-		.LENGTH					( 640	),
-		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_b.txt")
+		 .WIDTH					( 128	)
+		,.LENGTH				( 640	)
+		,.DPATH 				( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_b.txt")
+		,.RAND					( 0 )
+		,.RAND_CYC				( 8 )
 	)
 	in_gen_b (
 		.clk					( clk		),
@@ -97,9 +102,11 @@ module tb_data_route;
 
 	// input c
 	data_gen # (
-		.WIDTH					( 1536	),
-		.LENGTH					( 10	),
-		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_c.txt")
+		 .WIDTH					( 1536	)
+		,.LENGTH				( 10	)
+		,.DPATH 				( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_c.txt")
+		,.RAND					( 0 )
+		,.RAND_CYC				( 8 )
 	)
 	in_gen_c (
 		.clk					( clk		),
@@ -112,9 +119,11 @@ module tb_data_route;
 
 	// input d
 	data_gen # (
-		.WIDTH					( 1536	),
-		.LENGTH					( 10	),
-		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_d.txt")
+		 .WIDTH					( 1536	)
+		,.LENGTH				( 10	)
+		,.DPATH 				( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_d.txt")
+		,.RAND					( 0 )
+		,.RAND_CYC				( 8 )
 	)
 	in_gen_d (
 		.clk					( clk		),
@@ -127,9 +136,11 @@ module tb_data_route;
 
 	// input e
 	data_gen # (
-		.WIDTH					( 1536	),
-		.LENGTH					( 10	),
-		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_e.txt")
+		 .WIDTH					( 1536	)
+		,.LENGTH				( 10	)
+		,.DPATH 				( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_e.txt")
+		,.RAND					( 0 )
+		,.RAND_CYC				( 8 )
 	)
 	in_gen_e (
 		.clk					( clk		),
@@ -142,9 +153,11 @@ module tb_data_route;
 
 	// input i
 	data_gen # (
-		.WIDTH					( 1536	),
-		.LENGTH					( 10	),
-		.DPATH 					( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_i.txt")
+		 .WIDTH					( 1536	)
+		,.LENGTH				( 10	)
+		,.DPATH 				( "/media/Projects/poly_systolic_unit/py-sim/dat/data_route/input_i.txt")
+		,.RAND					( 0 )
+		,.RAND_CYC				( 8 )
 	)
 	in_gen_i (
 		.clk					( clk		),
@@ -192,6 +205,7 @@ module tb_data_route;
 		.in_valid				( in_valid ),
 
 		.dic_mode				( 1'b1 ),
+		.pe_array_weight_data_switch	( 1'b0 ),
 
 		.s_in_a_tdata			( in_tdata_a  ),
 		.s_in_a_tvalid			( in_tvalid_a ),
@@ -217,17 +231,17 @@ module tb_data_route;
 		.s_in_c_tvalid			( in_tvalid_c ),
 		.s_in_c_tready			( in_tready_c ),
 		.s_in_c_tkeep			( 16'hffff ),
-		.s_in_c_tlast			( in_tlast_c),
+		.s_in_c_tlast			( {23'h0, in_tlast_c}),
 		.m_out_c_tdata			( out_tdata_c ),
 		.m_out_c_tvalid			( out_tvalid_c ),
 		.m_out_c_tready			( out_tready_c ),
-		.m_out_c_tlast			( out_tlast_c),
+		.m_out_c_tlast			( out_tlast_c ),
 
 		.s_in_d_tdata			( in_tdata_d  ),
 		.s_in_d_tvalid			( in_tvalid_d ),
 		.s_in_d_tready			( in_tready_d ),
 		.s_in_d_tkeep			( 16'hffff ),
-		.s_in_d_tlast			( in_tlast_d),
+		.s_in_d_tlast			( {23'h0, in_tlast_d} ),
 		.m_out_d_tdata			( out_tdata_d ),
 		.m_out_d_tvalid			( out_tvalid_d ),
 		.m_out_d_tready			( out_tready_d ),
