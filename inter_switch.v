@@ -113,6 +113,7 @@ module inter_switch (
 	wire	[23:0]			s_inter_tlast, m_inter_tlast;
 	wire	[11:0]			m_inter_tlast_a, m_inter_tlast_b;
 	wire	[23:0]			m_inter_tlast_h;
+	wire					m_inter_tlast_reduce;
 	wire					in_a_tvalid, in_b_tvalid, in_c_tvalid, in_d_tvalid,
 							in_e_tvalid, in_i_tvalid;
 
@@ -168,6 +169,7 @@ module inter_switch (
 	);
 
 
+	assign m_inter_tlast_reduce = | m_inter_tlast;
 	assign m_inter_tdata = m_inter_tdata_bus[1535:0];
 	assign m_inter_tlast = m_inter_tdata_bus[1559:1536];
 	assign m_inter_weight_switch = m_inter_tdata_bus[1560];
@@ -175,8 +177,8 @@ module inter_switch (
 	assign m_inter_tlast_b = switch_out_en[1] ? m_inter_tlast[11:0] : 12'h0;
 	assign m_out_c_tlast = switch_out_en[2] ? m_inter_tlast[11:0] : 12'b0;
 	assign m_out_d_tlast = switch_out_en[3] ? m_inter_tlast[11:0] : 12'b0;
-	assign m_out_f_tlast = switch_out_en[5] ? m_inter_tlast[0] : 1'b0;
-	assign m_out_g_tlast = switch_out_en[6] ? m_inter_tlast[0] : 1'b0;
+	assign m_out_f_tlast = switch_out_en[5] ? m_inter_tlast_reduce : 1'b0;
+	assign m_out_g_tlast = switch_out_en[6] ? m_inter_tlast_reduce : 1'b0;
 	assign m_inter_tlast_h = switch_out_en[7] ? m_inter_tlast : 24'h0;
 	assign count_switch_tvalid = s_inter_tvalid & s_inter_tready;
 

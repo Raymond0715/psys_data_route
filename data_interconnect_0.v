@@ -54,7 +54,7 @@ module data_interconnect_0 (
 	output										m_out_dic_c_tvalid,
 	input										m_out_dic_c_tready,
 	output	[3:0]								m_out_dic_c_tlast,
-	output	[3:0]								out_dic_c_weight_switch,
+	output										out_dic_c_weight_switch,
 
 	output	[255:0]								m_out_dic_d_tdata,
 	output										m_out_dic_d_tvalid,
@@ -97,7 +97,9 @@ module data_interconnect_0 (
 
 	assign m_out_dic_d_tvalid = mode ? s_in_h_tvalid : 0;
 	assign m_out_dic_d_tlast  = mode ? s_in_h_tlast : 0;
-	assign out_dic_d_weight_switch = mode ? h_weight_switch : 0;
+	assign out_dic_d_weight_switch =
+		m_out_dic_d_tvalid & m_out_dic_d_tready & m_out_dic_d_tlast & mode ?
+		1 : 0;
 
 	assign s_in_f_tready = mode ? out_dic_c_tready : m_out_dic_d_tready;
 	assign s_in_h_tready = mode ? m_out_dic_d_tready : m_out_dic_a_tready;

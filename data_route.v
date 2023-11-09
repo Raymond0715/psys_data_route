@@ -103,7 +103,7 @@ module data_route (
 	input										m_out_dic_c_tready,
 	output	reg [15:0]							m_out_dic_c_tkeep = 16'hffff,
 	output	[3:0]								m_out_dic_c_tlast,
-	output	[3:0]								out_dic_c_weight_switch,
+	output										out_dic_c_weight_switch,
 
 	output	[255:0]								m_out_dic_d_tdata,
 	output										m_out_dic_d_tvalid,

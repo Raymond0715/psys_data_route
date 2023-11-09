@@ -77,7 +77,7 @@ module out_switch # (
 
 	assign weight_switch_out = m_out[DWIDTH+LASTW];
 	assign m_axis_tdata = m_out[DWIDTH+LASTW-1:LASTW];
-	assign m_axis_tlast = m_out[LASTW-1:0];
+	assign m_axis_tlast = m_axis_tvalid ? m_out[LASTW-1:0] : 0;
 
 
 	axi_register_slice_v2_1_axic_register_slice # (
