@@ -50,7 +50,7 @@ module data_interconnect_0 (
 	output										m_out_dic_b_tvalid,
 	input										m_out_dic_b_tready,
 
-	output	[6143:0]							m_out_dic_c_tdata,
+	output	[3071:0]							m_out_dic_c_tdata,
 	output										m_out_dic_c_tvalid,
 	input										m_out_dic_c_tready,
 	output	[3:0]								m_out_dic_c_tlast,
@@ -68,7 +68,7 @@ module data_interconnect_0 (
 								out_dic_c_tlast, out_dic_c_weight_switch_pre;
 
 
-	in1536_out6144 out_dic_convert (
+	in1536_out3072 out_dic_convert (
 		.clk					( clk ),
 		.rst_n					( rst_n ),
 		.s_axis_tdata			( s_in_f_tdata ),
