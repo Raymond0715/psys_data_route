@@ -117,7 +117,7 @@ module in1536_out3072 (
 				m_axis_tlast <= 2'h0;
 				weight_switch_reg <= 2'h0;
 			end
-			else if (s_axis_tvalid & s_axis_tready && count < 14'3072) begin
+			else if (s_axis_tvalid & s_axis_tready && count < 14'd3072) begin
 				m_axis_tdata <= m_axis_tdata >> 11'd1536;
 				m_axis_tdata[3071:1536] <= s_axis_tdata;
 
