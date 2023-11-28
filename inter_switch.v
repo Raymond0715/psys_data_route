@@ -107,9 +107,9 @@ module inter_switch (
 	wire	[8:0]			switch_out_en;
 
 	// Input
-	wire	[1535:0]		inter_tdata_ina, inter_tdata_inb, inter_tdata_inc,
-							inter_tdata_ind, inter_tdata_ine, inter_tdata_ini;
-	wire	[23:0]			in_a_tlast, in_b_tlast, in_c_tlast, in_d_tlast;
+	//wire	[1535:0]		inter_tdata_ina, inter_tdata_inb, inter_tdata_inc,
+							//inter_tdata_ind, inter_tdata_ine, inter_tdata_ini;
+	//wire	[23:0]			in_a_tlast, in_b_tlast, in_c_tlast, in_d_tlast;
 	wire	[23:0]			s_inter_tlast, m_inter_tlast;
 	wire	[11:0]			m_inter_tlast_a, m_inter_tlast_b;
 	wire	[23:0]			m_inter_tlast_h;
@@ -132,25 +132,39 @@ module inter_switch (
 	assign in_e_tvalid = switch_in_en[4] & s_in_e_tvalid;
 	assign in_i_tvalid = switch_in_en[5] & s_in_i_tvalid;
 
-	assign in_a_tlast  = switch_in_en[0] ? {12'h0, s_in_a_tlast} : 24'h0;
-	assign in_b_tlast  = switch_in_en[1] ? {12'h0, s_in_b_tlast} : 24'h0;
-	assign in_c_tlast  = switch_in_en[2] ? s_in_c_tlast : 24'h0;
-	assign in_d_tlast  = switch_in_en[3] ? s_in_d_tlast : 24'h0;
+	//assign in_a_tlast  = switch_in_en[0] ? {12'h0, s_in_a_tlast} : 24'h0;
+	//assign in_b_tlast  = switch_in_en[1] ? {12'h0, s_in_b_tlast} : 24'h0;
+	//assign in_c_tlast  = switch_in_en[2] ? s_in_c_tlast : 24'h0;
+	//assign in_d_tlast  = switch_in_en[3] ? s_in_d_tlast : 24'h0;
 
-	assign inter_tdata_ina = in_a_tvalid ? s_in_a_tdata : 0;
-	assign inter_tdata_inb = in_b_tvalid ? s_in_b_tdata : 0;
-	assign inter_tdata_inc = in_c_tvalid ? s_in_c_tdata : 0;
-	assign inter_tdata_ind = in_d_tvalid ? s_in_d_tdata : 0;
-	assign inter_tdata_ine = in_e_tvalid ? s_in_e_tdata : 0;
-	assign inter_tdata_ini = in_i_tvalid ? s_in_i_tdata : 0;
+	//assign inter_tdata_ina = in_a_tvalid ? s_in_a_tdata : 0;
+	//assign inter_tdata_inb = in_b_tvalid ? s_in_b_tdata : 0;
+	//assign inter_tdata_inc = in_c_tvalid ? s_in_c_tdata : 0;
+	//assign inter_tdata_ind = in_d_tvalid ? s_in_d_tdata : 0;
+	//assign inter_tdata_ine = in_e_tvalid ? s_in_e_tdata : 0;
+	//assign inter_tdata_ini = in_i_tvalid ? s_in_i_tdata : 0;
 
-	assign s_inter_tdata = inter_tdata_ina | inter_tdata_inb | inter_tdata_inc
-						| inter_tdata_ind | inter_tdata_ine | inter_tdata_ini; 
+	//assign s_inter_tdata = inter_tdata_ina | inter_tdata_inb | inter_tdata_inc
+						//| inter_tdata_ind | inter_tdata_ine | inter_tdata_ini; 
+
+	assign s_inter_tdata = in_a_tvalid ?
+						s_in_a_tdata : in_b_tvalid ?
+							s_in_b_tdata : in_c_tvalid ?
+								s_in_c_tdata : in_d_tvalid ?
+									s_in_d_tdata : in_e_tvalid ?
+										s_in_e_tdata : in_i_tvalid ?
+											s_in_i_tdata : 1536'h0;
 
 	assign s_inter_tvalid = in_a_tvalid | in_b_tvalid | in_c_tvalid
 						 | in_d_tvalid | in_e_tvalid | in_i_tvalid;
 
-	assign s_inter_tlast = in_a_tlast | in_b_tlast | in_c_tlast | in_d_tlast;
+	//assign s_inter_tlast = in_a_tlast | in_b_tlast | in_c_tlast | in_d_tlast;
+	//
+	assign s_inter_tlast = switch_in_en[0] ?
+						{12'h0, s_in_a_tlast} : switch_in_en[1] ?
+							{12'h0, s_in_b_tlast} : switch_in_en[2] ?
+								s_in_c_tlast : switch_in_en[3] ?
+									s_in_d_tlast : 24'h0;
 	
 
 	axi_register_slice_v2_1_axic_register_slice # (

@@ -60,16 +60,24 @@ module out_switch # (
 	reg							rstn_reg;
 
 
-	assign tdata_0 = s_axis_tvalid_0 ? s_axis_tdata_0 : 0;
-	assign tdata_1 = s_axis_tvalid_1 ? s_axis_tdata_1 : 0;
-	assign tdata_2 = s_axis_tvalid_2 ? s_axis_tdata_2 : 0;
-	assign tlast_0 = s_axis_tvalid_0 ? s_axis_tlast_0 : 0;
-	assign tlast_1 = s_axis_tvalid_1 ? s_axis_tlast_1 : 0;
-	assign tlast_2 = s_axis_tvalid_2 ? s_axis_tlast_2 : 0;
+	//assign tdata_0 = s_axis_tvalid_0 ? s_axis_tdata_0 : 0;
+	//assign tdata_1 = s_axis_tvalid_1 ? s_axis_tdata_1 : 0;
+	//assign tdata_2 = s_axis_tvalid_2 ? s_axis_tdata_2 : 0;
+	//assign tlast_0 = s_axis_tvalid_0 ? s_axis_tlast_0 : 0;
+	//assign tlast_1 = s_axis_tvalid_1 ? s_axis_tlast_1 : 0;
+	//assign tlast_2 = s_axis_tvalid_2 ? s_axis_tlast_2 : 0;
 
-	assign tdata = tdata_0 | tdata_1 | tdata_2;
+	//assign tdata = tdata_0 | tdata_1 | tdata_2;
 	assign tvalid = s_axis_tvalid_0 | s_axis_tvalid_1 | s_axis_tvalid_2;
-	assign tlast = tlast_0 | tlast_1 | tlast_2;
+	//assign tlast = tlast_0 | tlast_1 | tlast_2;
+
+	assign tdata = s_axis_tvalid_0 ?
+				s_axis_tdata_0 : s_axis_tvalid_1 ?
+					s_axis_tdata_1 : s_axis_tvalid_2 ? s_axis_tdata_2 : 0;
+
+	assign tlast = s_axis_tvalid_0 ? 
+				s_axis_tlast_0 : s_axis_tvalid_1 ?
+					s_axis_tlast_1 : s_axis_tvalid_2 ? s_axis_tlast_2 : 0;
 
 	assign s_axis_tready_0 = tready;
 	assign s_axis_tready_1 = tready;
